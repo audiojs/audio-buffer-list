@@ -4,7 +4,8 @@
   "description": "Data structure for sequence of AudioBuffers",
   "main": "index.js",
   "scripts": {
-    "test": "node test"
+    "test": "node test",
+    "test:browser": "budo test"
   },
   "repository": {
     "type": "git",
@@ -32,6 +33,7 @@
   "dependencies": {
     "audio-buffer": "^3.0.0",
     "audio-buffer-utils": "^4.1.1",
+    "audio-context": "^0.1.0",
     "bl": "^1.2.0",
     "inherits": "^2.0.3",
     "is-audio-buffer": "^1.0.5",

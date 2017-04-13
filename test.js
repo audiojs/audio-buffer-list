@@ -9,12 +9,23 @@ const fs = require('fs')
 const Through = require('audio-through')
 
 //new methods
-t('create', t => {
+t('AudioBuffer properties', t => {
+	let bl = new AudioBufferList(new AudioBuffer([0,1,2,3]))
+
+	t.equal(bl.length, 2)
+	t.equal(bl.numberOfChannels, 2)
+	t.equal(bl.duration, 2/bl.sampleRate)
+
+	bl.append(new AudioBuffer(3, [4,5,6,7,8,9,10,11,12,13]))
+
+	t.equal(bl.length, 5)
+	t.equal(bl.numberOfChannels, 3)
+	t.ok(Math.abs(bl.duration - 5/bl.sampleRate) < 1e-8)
+
 	t.end()
 })
-t('append', t => {
-	t.end()
-})
+
+
 t('splice', t => {
 	t.end()
 })
@@ -24,9 +35,7 @@ t('delete', t => {
 t('insert', t => {
 	t.end()
 })
-t('copy', t => {
-	t.end()
-})
+
 
 
 //bl patch methods
@@ -172,8 +181,8 @@ t('append accepts arrays of Buffers', function (t) {
 t('append accepts arrays of AudioBufferLists', function (t) {
   var bl = new AudioBufferList()
   bl.append(new AudioBuffer(1, [0,1,2]))
-  bl.append([ new AudioBufferList([3,4,5]) ])
-  bl.append(new AudioBufferList([ new AudioBuffer(1, [6,7,8]), new AudioBufferList([9,10,11]) ]))
+  bl.append([ new AudioBufferList(new AudioBuffer(1, [3,4,5])) ])
+  bl.append(new AudioBufferList([ new AudioBuffer(1, [6,7,8]), new AudioBufferList(new AudioBuffer(1, [9,10,11])) ]))
   bl.append([ new AudioBuffer(1, [12,13,14,15]), new AudioBufferList([ new AudioBuffer(1, [16,17,18,19,20]), new AudioBuffer(1, [21,22,23,24,25]) ]) ])
   t.equal(bl.length, 26)
   t.deepEqual(bl.slice().getChannelData(0), [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25])
@@ -190,9 +199,9 @@ t('append chainable', function (t) {
 })
 
 t('append chainable (test results)', function (t) {
-  var bl = new AudioBufferList([0,1,2])
-    .append([ new AudioBufferList([3,4,5]) ])
-    .append(new AudioBufferList([ new AudioBuffer(1, [6,7,8]), new AudioBufferList([9,10,11]) ]))
+  var bl = new AudioBufferList(new AudioBuffer(1, [0,1,2]))
+    .append([ new AudioBufferList(new AudioBuffer(1, [3,4,5])) ])
+    .append(new AudioBufferList([ new AudioBuffer(1, [6,7,8]), new AudioBufferList(new AudioBuffer(1, [9,10,11])) ]))
     .append([ new AudioBuffer(1, [12,13,14,15]), new AudioBufferList([ new AudioBuffer(1, [16,17,18,19,20]), new AudioBuffer(1, [21,22,23,24,25]) ]) ])
 
   t.equal(bl.length, 26)
@@ -418,7 +427,7 @@ t('shallow slice does not make a copy', function (t) {
 t('duplicate', function (t) {
   t.plan(2)
 
-  var bl = new AudioBufferList([0,.1,.2,3,4,5,6,7,8,9])
+  var bl = new AudioBufferList(new AudioBuffer(1, [0,1,2,3,4,5,6,7,8,9]))
     , dup = bl.duplicate()
 
   t.equal(bl.prototype, dup.prototype)
@@ -428,14 +437,14 @@ t('duplicate', function (t) {
 t('destroy no pipe', function (t) {
   t.plan(2)
 
-  var bl = new AudioBufferList([0,1,0,1,0,1,0,1])
+  var bl = new AudioBufferList(new AudioBuffer(1, [0,1,0,1,0,1,0,1]))
   bl.destroy()
 
   t.equal(bl._bufs.length, 0)
   t.equal(bl.length, 0)
 })
 
-!process.browser && t('destroy with pipe before read end', function (t) {
+!process.browser && t.skip('destroy with pipe before read end', function (t) {
   t.plan(2)
 
   var bl = new AudioBufferList()
@@ -449,7 +458,7 @@ t('destroy no pipe', function (t) {
 
 })
 
-!process.browser && t('destroy with pipe before read end with race', function (t) {
+!process.browser && t.skip('destroy with pipe before read end with race', function (t) {
   t.plan(2)
 
   var bl = new AudioBufferList()
@@ -465,7 +474,7 @@ t('destroy no pipe', function (t) {
   }, 500)
 })
 
-!process.browser && t('destroy with pipe after read end', function (t) {
+!process.browser && t.skip('destroy with pipe after read end', function (t) {
   t.plan(2)
 
   var bl = new AudioBufferList()

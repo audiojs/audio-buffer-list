@@ -12,6 +12,8 @@ var BufferList = require('bl')
 var util = require('audio-buffer-utils')
 var AudioBuffer = require('audio-buffer')
 var DuplexStream = require('readable-stream/duplex')
+var extend = require('object-assign')
+var context = require('audio-context')
 
 module.exports = AudioBufferList
 
@@ -19,11 +21,14 @@ module.exports = AudioBufferList
 inherit(AudioBufferList, BufferList)
 
 
-function AudioBufferList(callback) {
-  if (!(this instanceof AudioBufferList)) return new AudioBufferList(callback)
+function AudioBufferList(callback, options) {
+  if (!(this instanceof AudioBufferList)) return new AudioBufferList(callback, options)
+
+  extend(this, options)
 
   this._bufs  = []
   this.length = 0
+  this.duration = 0
 
   if (typeof callback == 'function') {
     this._callback = callback
@@ -50,8 +55,8 @@ function AudioBufferList(callback) {
 }
 
 //track max channels
-AudioBufferList.prototype.channels = 1
-
+AudioBufferList.prototype.numberOfChannels = 2
+AudioBufferList.prototype.sampleRate = context.sampleRate || 44100
 
 
 //patch BufferList methods
@@ -64,21 +69,21 @@ AudioBufferList.prototype.append = function (buf) {
 		this._appendBuffer(buf)
 	}
 	else if (Array.isArray(buf)) {
-		for (; i < buf.length; i++) {
-			this.append(buf[i])
-		}
-	}
-	// unwrap argument into individual BufferLists
-	else if (buf instanceof AudioBufferList) {
-		for (; i < buf._bufs.length; i++)
-			this.append(buf._bufs[i])
-	}
-	//create AudioBuffer from arg
-	else if (buf != null) {
+    for (; i < buf.length; i++) {
+      this.append(buf[i])
+    }
+  }
+  // unwrap argument into individual BufferLists
+  else if (buf instanceof AudioBufferList) {
+    for (; i < buf._bufs.length; i++)
+      this.append(buf._bufs[i])
+  }
+  //create AudioBuffer from arg
+  else if (buf != null) {
     if (typeof buf == 'number') {
       buf = [buf]
     }
-		buf = new AudioBuffer(this.channels, buf)
+		buf = new AudioBuffer(this.numberOfChannels, buf)
 		this._appendBuffer(buf)
 	}
 
@@ -86,10 +91,16 @@ AudioBufferList.prototype.append = function (buf) {
 }
 
 AudioBufferList.prototype._appendBuffer = function (buf) {
+  if (buf.sampleRate != this.sampleRate) throw Error('Required sample rate is ' + this.sampleRate + ', passed ' + buf.sampleRate)
+
   BufferList.prototype._appendBuffer.call(this, buf)
 
+  // if (buf.numberOfChannels != this.numberOfChannels) throw Error('Required number of channels is ' + this.numberOfChannels + ', passed ' + buf.numberOfChannels)
   //update channels count
-	this.channels = Math.max(this.channels, buf.numberOfChannels)
+  this.numberOfChannels = Math.max(this.numberOfChannels, buf.numberOfChannels)
+  this.duration += buf.duration
+
+  return this
 }
 
 //get method here returns audio buffer with single sample if it makes any sense
@@ -104,9 +115,9 @@ AudioBufferList.prototype.copy = function copy (dst, dstStart, srcStart, srcEnd)
 	if (typeof srcEnd != 'number' || srcEnd > this.length)
 		srcEnd = this.length
 	if (srcStart >= this.length)
-		return dst || new AudioBuffer(this.channels, 1)
+		return dst || new AudioBuffer(this.numberOfChannels, 1)
 	if (srcEnd <= 0)
-		return dst || new AudioBuffer(this.channels, 1)
+		return dst || new AudioBuffer(this.numberOfChannels, 1)
 
   var copy   = !!dst
     , off    = this._offset(srcStart)
@@ -193,10 +204,12 @@ AudioBufferList.prototype.consume = function consume (bytes) {
     if (bytes >= this._bufs[0].length) {
       bytes -= this._bufs[0].length
       this.length -= this._bufs[0].length
+      this.duration -= this._bufs[0].duration
       this._bufs.shift()
     } else {
       this._bufs[0] = util.slice(this._bufs[0], bytes)
       this.length -= bytes
+      this.duration -= this._bufs[0].duration
       break
     }
   }
@@ -244,8 +257,6 @@ AudioBufferList.prototype.duplicate = function duplicate () {
 
 
 // AudioBuffer properties & methods
-AudioBufferList.prototype.duration
-AudioBufferList.prototype.numberOfChannels
 AudioBufferList.prototype.sampleRate
 AudioBufferList.prototype.copyFromChannel
 AudioBufferList.prototype.copyToChannel
@@ -267,13 +278,3 @@ AudioBufferList.prototype.getChannelData
 // AudioBufferList.prototype.splice = function (from, del, insert) {
 
 // }
-
-// AudioBufferList.prototype.slice = function (start, end) {
-
-// }
-
-// AudioBufferList.prototype.copy = function (dest, destStart, start, end) {
-
-// }
-
-//TODO: shallowSlice or handle or subarray - return pointer
