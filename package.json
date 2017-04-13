@@ -38,6 +38,7 @@
     "object-assign": "^4.1.1"
   },
   "devDependencies": {
+    "audio-through": "^2.2.2",
     "tape": "^4.6.3"
   }
 }

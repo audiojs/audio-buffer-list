@@ -11,6 +11,7 @@ var inherit = require('inherits')
 var BufferList = require('bl')
 var util = require('audio-buffer-utils')
 var AudioBuffer = require('audio-buffer')
+var DuplexStream = require('readable-stream/duplex')
 
 module.exports = AudioBufferList
 
@@ -18,8 +19,34 @@ module.exports = AudioBufferList
 inherit(AudioBufferList, BufferList)
 
 
-function AudioBufferList(buffers) {
-	BufferList.apply(this, arguments)
+function AudioBufferList(callback) {
+  if (!(this instanceof AudioBufferList)) return new AudioBufferList(callback)
+
+  this._bufs  = []
+  this.length = 0
+
+  if (typeof callback == 'function') {
+    this._callback = callback
+
+    var piper = function piper (err) {
+      if (this._callback) {
+        this._callback(err)
+        this._callback = null
+      }
+    }.bind(this)
+
+    this.on('pipe', function onPipe (src) {
+      src.on('error', piper)
+    })
+    this.on('unpipe', function onUnpipe (src) {
+      src.removeListener('error', piper)
+    })
+  } else {
+    this.append(callback)
+  }
+
+  //single line different from bl
+  DuplexStream.call(this, {objectMode: true})
 }
 
 //track max channels
@@ -48,7 +75,10 @@ AudioBufferList.prototype.append = function (buf) {
 	}
 	//create AudioBuffer from arg
 	else if (buf != null) {
-		buf = new AudioBuffer(buf)
+    if (typeof buf == 'number') {
+      buf = [buf]
+    }
+		buf = new AudioBuffer(this.channels, buf)
 		this._appendBuffer(buf)
 	}
 
@@ -148,12 +178,12 @@ AudioBufferList.prototype.shallowSlice = function shallowSlice (start, end) {
     , buffers = this._bufs.slice(startOffset[0], endOffset[0] + 1)
 
   if (startOffset[1] != 0)
-    buffers[0] = util.slice(buffers[0], startOffset[1])
+    buffers[0] = util.subbuffer(buffers[0], startOffset[1])
 
   if (endOffset[1] == 0)
     buffers.pop()
   else
-    buffers[buffers.length-1] = util.slice(buffers[buffers.length-1], 0, endOffset[1])
+    buffers[buffers.length-1] = util.subbuffer(buffers[buffers.length-1], 0, endOffset[1])
 
   return new AudioBufferList(buffers)
 }
@@ -213,6 +243,15 @@ AudioBufferList.prototype.duplicate = function duplicate () {
 
 
 
+// AudioBuffer properties & methods
+AudioBufferList.prototype.duration
+AudioBufferList.prototype.numberOfChannels
+AudioBufferList.prototype.sampleRate
+AudioBufferList.prototype.copyFromChannel
+AudioBufferList.prototype.copyToChannel
+AudioBufferList.prototype.getChannelData
+
+// Remove buffer dep
 
 // Additional methods
 

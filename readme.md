@@ -20,7 +20,7 @@ abl.slice() // <AudioBuffer 0, .1, .2, .3, 0...>
 
 ## See also
 
-* [audio](https://github.com/audiojs/audio) — high-level class to work with audio
+* [audio](https://github.com/audiojs/audio) — high-level class for audio
 * [audio-buffer](https://github.com/audiojs/audio-buffer) — audio buffer class for nodejs and browser
 * [audio-buffer-utils](https://github.com/audio-buffer-utils) — toolset for audio buffers
 * [buffer-list](https://npmjs.org/package/bl) — canonical BufferList implementation
