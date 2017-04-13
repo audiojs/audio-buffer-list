@@ -32,14 +32,14 @@ t('copy', t => {
 //bl patch methods
 t('single bytes from single buffer', function (t) {
   var bl = new AudioBufferList()
-  bl.append(new AudioBuffer(1, [0,.1,.2,.3]))
+  bl.append(new AudioBuffer(1, [0,1,2,3]))
 
   t.equal(bl.length, 4)
 
   t.equal(bl.get(0, 0), 0)
-  t.equal(bl.get(1, 0), .1)
-  t.equal(bl.get(2, 0), .2)
-  t.equal(bl.get(3, 0), .3)
+  t.equal(bl.get(1, 0), 1)
+  t.equal(bl.get(2, 0), 2)
+  t.equal(bl.get(3, 0), 3)
 
   t.end()
 })
