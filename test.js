@@ -47,22 +47,20 @@ t('AudioBuffer properties', t => {
 })
 
 
-t.skip('copyToChannel', function (t) {
-	var a = new AudioBuffer(2, 40);
+t('copyToChannel', function (t) {
+	var a = new AudioBufferList(new AudioBuffer(2, 20)).repeat(2);
 	var arr = new Float32Array(40);
-	arr.fill(-0.5);
+	arr.fill(-1);
 
 	a.copyToChannel(arr, 0, 0);
-
-	assert.deepEqual(arr, a.getChannelData(0));
-
+	t.deepEqual(arr, a.getChannelData(0));
 
 	a.copyToChannel(arr, 1, 10);
 
 	var zeros = new Float32Array(10);
 	arr.set(zeros);
 
-	assert.deepEqual(arr, a.getChannelData(1));
+	t.deepEqual(arr, a.getChannelData(1));
 	t.end()
 });
 
@@ -74,7 +72,7 @@ t('copyFromChannel', function (t) {
 	t.deepEqual(arr, a.getChannelData(0));
 
 	a.copyFromChannel(arr, 1, 10);
-	var result = Array(10).fill(-1).concat(Array(30).fill(1));
+	var result = Array(30).fill(1).concat(Array(10).fill(-1));
 	t.deepEqual(arr, result);
 
 	t.end()

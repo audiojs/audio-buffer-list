@@ -62,13 +62,30 @@ AudioBufferList.prototype.sampleRate = context.sampleRate || 44100
 //copy from channel into destination array
 AudioBufferList.prototype.copyFromChannel = function (destination, channel, startInChannel) {
   if (startInChannel == null) startInChannel = 0
-  var offset = this._offset(startInChannel)[1]
-  for (var i = 0, l = this._bufs.length; i < l; i++) {
+  var offsets = this._offset(startInChannel)
+  var offset = startInChannel - offsets[1]
+  var initialOffset = offsets[1]
+  for (var i = offsets[0], l = this._bufs.length; i < l; i++) {
     var buf = this._bufs[i]
     var data = buf.getChannelData(channel)
-    if (offset + data.length > destination.length) data = data.subarray(0, destination.length - offset)
+    if (startInChannel > offset) data = data.subarray(startInChannel)
     if (channel < buf.numberOfChannels) {
-      destination.set(data, offset);
+      destination.set(data, Math.max(0, offset - initialOffset))
+    }
+    offset += buf.length
+  }
+}
+
+//put data from array to channel
+AudioBufferList.prototype.copyToChannel = function (source, channel, startInChannel) {
+  if (startInChannel == null) startInChannel = 0
+  var offsets = this._offset(startInChannel)
+  var offset = startInChannel - offsets[1]
+  for (var i = offsets[0], l = this._bufs.length; i < l; i++) {
+    var buf = this._bufs[i]
+    var data = buf.getChannelData(channel)
+    if (channel < buf.numberOfChannels) {
+      data.set(source.subarray(Math.max(offset, startInChannel), offset + data.length), Math.max(0, startInChannel - offset));
     }
     offset += buf.length
   }
@@ -109,8 +126,9 @@ AudioBufferList.prototype.repeat = function (times) {
 
   if (times === 1) return this
 
-  var data = this.slice()
+  var data = this
   for (var i = 1; i < times; i++) {
+    data = data.slice()
     this.append(data)
   }
 
@@ -192,10 +210,9 @@ AudioBufferList.prototype.copy = function copy (dst, dstStart, srcStart, srcEnd)
   if (srcStart === 0 && srcEnd == this.length) {
     if (!copy) { // slice, but full concat if multiple buffers
       return this._bufs.length === 1
-        ? this._bufs[0]
+        ? util.slice(this._bufs[0])
         : util.concat(this._bufs)
     }
-
     // copy, need to copy individual buffers
     for (i = 0; i < this._bufs.length; i++) {
       util.copy(this._bufs[i], dst, bufoff)
@@ -209,11 +226,11 @@ AudioBufferList.prototype.copy = function copy (dst, dstStart, srcStart, srcEnd)
   if (bytes <= this._bufs[off[0]].length - start) {
     return copy
       ? util.copy(util.subbuffer(this._bufs[off[0]], start, start + bytes), dst, dstStart)
-      : util.subbuffer(this._bufs[off[0]], start, start + bytes)
+      : util.slice(this._bufs[off[0]], start, start + bytes)
   }
 
   if (!copy) // a slice, we need something to copy in to
-    dst = new AudioBuffer(len)
+    dst = new AudioBuffer(this.numberOfChannels, len)
 
   for (i = off[0]; i < this._bufs.length; i++) {
     l = this._bufs[i].length - start

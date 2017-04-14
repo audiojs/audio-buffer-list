@@ -32,9 +32,13 @@ abl.slice() // <AudioBuffer 0, .1, .2, .3, 0...>
 
 Return _FloatArray_ with merged data for the channel.
 
-### `list.copyFromChannel(destination, channel, startFrom=0)`
+### `list.copyFromChannel(destination, channel, startInChannel=0)`
 
-Put data from the channel to destination _FloatArray_. Optional `startFrom` defines offset in the channel to start from.
+Put data from the channel to destination _FloatArray_. Optional `startInChannel` defines offset in the channel to start from.
+
+### `list.copyToChannel(source, channel, startInChannel=0)`
+
+Put data from the `source` _FloatArray_ into channel, optionally starting at `startInChannel` offset.
 
 ### `list.repeat(count)`
 
