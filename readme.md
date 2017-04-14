@@ -20,9 +20,9 @@ abl.slice() // <AudioBuffer 0, .1, .2, .3, 0...>
 
 ## API
 
-### `new AudioBufferList(source, options)`
+### `new AudioBufferList(source, options?)`
 
-`source` can be AudioBuffer, AudioBuffer array, AudioBufferList AudioBufferList array or callback.
+`source` can be _AudioBuffer_, _AudioBuffer_ array, _AudioBufferList_, _AudioBufferList_ array or callback.
 
 `options` may provide `numberOfChannels`, `context` for web audio API context and `sampleRate`.
 

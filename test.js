@@ -8,7 +8,30 @@ const isAudioBuffer = require('is-audio-buffer')
 const fs = require('fs')
 const Through = require('audio-through')
 
+
+
 //new methods
+t('repeat', t => {
+	var a = new AudioBufferList(new AudioBuffer(2, 10))
+	a.repeat(0)
+	t.equal(a.length, 0)
+
+	var b = new AudioBufferList(new AudioBuffer(2, 10))
+	b.repeat(1)
+	t.equal(b.length, 10)
+
+	var c = new AudioBufferList(new AudioBuffer(2, 10))
+	c.repeat(2)
+	t.equal(c.length, 20)
+
+	t.end()
+})
+
+
+
+
+
+//AudioBuffer methods/props
 t('AudioBuffer properties', t => {
 	let bl = new AudioBufferList(new AudioBuffer([0,1,2,3]))
 
@@ -24,6 +47,45 @@ t('AudioBuffer properties', t => {
 
 	t.end()
 })
+
+
+t('copyToChannel', function (t) {
+	var a = new AudioBuffer(2, 40);
+	var arr = new Float32Array(40);
+	arr.fill(-0.5);
+
+	a.copyToChannel(arr, 0, 0);
+
+	assert.deepEqual(arr, a.getChannelData(0));
+
+
+	a.copyToChannel(arr, 1, 10);
+
+	var zeros = new Float32Array(10);
+	arr.set(zeros);
+
+	assert.deepEqual(arr, a.getChannelData(1));
+	t.end()
+});
+
+t('copyFromChannel', function (t) {
+	var a = new AudioBufferList(new AudioBuffer(2, 20)).repeat(2);
+	var arr = new Float32Array(40);
+	a.getChannelData(0).fill(-0.5);
+	a.getChannelData(1).fill(0.5);
+	a.getChannelData(1).set((new Float32Array(20)).fill(-0.5), 20);
+
+	a.copyFromChannel(arr, 0);
+	assert.deepEqual(arr, a.getChannelData(0));
+
+	a.copyFromChannel(arr, 1, 10);
+
+	var fixture = Array(10).fill(0.5).concat(Array(30).fill(-0.5));
+
+	assert.deepEqual(arr, fixture);
+	t.end()
+});
+
 
 
 t('splice', t => {

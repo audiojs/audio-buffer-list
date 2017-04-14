@@ -54,9 +54,39 @@ function AudioBufferList(callback, options) {
   DuplexStream.call(this, {objectMode: true})
 }
 
-//track max channels
+//AudioBuffer interface
 AudioBufferList.prototype.numberOfChannels = 2
 AudioBufferList.prototype.sampleRate = context.sampleRate || 44100
+
+//copy from channel into destination array
+AudioBufferList.prototype.copyFromChannel = function (destination, channel, startInChannel) {
+  var offset = this._offset(startInChannel)
+  console.log(offset)
+  for (var i = 0, l = this._bufs.length; i < l; i++) {
+    var buf = this._bufs[i]
+    if (channel < buf.numberOfChannels) {
+      destination.set(buf.getChannelData(channel), offset);
+    }
+    offset += buf.length
+  }
+}
+
+//repeat contents N times
+AudioBufferList.prototype.repeat = function (times) {
+  if (!times) {
+    this.consume(this.length)
+    return this
+  }
+
+  if (times === 1) return this
+
+  var data = this.slice()
+  for (var i = 1; i < times; i++) {
+    this.append(data)
+  }
+
+  return this
+}
 
 
 //patch BufferList methods
@@ -115,9 +145,9 @@ AudioBufferList.prototype.copy = function copy (dst, dstStart, srcStart, srcEnd)
 	if (typeof srcEnd != 'number' || srcEnd > this.length)
 		srcEnd = this.length
 	if (srcStart >= this.length)
-		return dst || new AudioBuffer(this.numberOfChannels, 1)
+		return dst || new AudioBuffer(this.numberOfChannels, 0)
 	if (srcEnd <= 0)
-		return dst || new AudioBuffer(this.numberOfChannels, 1)
+		return dst || new AudioBuffer(this.numberOfChannels, 0)
 
   var copy   = !!dst
     , off    = this._offset(srcStart)
@@ -255,12 +285,6 @@ AudioBufferList.prototype.duplicate = function duplicate () {
 }())
 
 
-
-// AudioBuffer properties & methods
-AudioBufferList.prototype.sampleRate
-AudioBufferList.prototype.copyFromChannel
-AudioBufferList.prototype.copyToChannel
-AudioBufferList.prototype.getChannelData
 
 // Remove buffer dep
 
