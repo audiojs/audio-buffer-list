@@ -14,6 +14,7 @@ var AudioBuffer = require('audio-buffer')
 var DuplexStream = require('readable-stream/duplex')
 var extend = require('object-assign')
 var context = require('audio-context')
+var nidx = require('negative-index')
 
 module.exports = AudioBufferList
 
@@ -111,31 +112,6 @@ AudioBufferList.prototype.getChannelData = function (channel) {
 
   return data
 }
-
-
-
-//repeat contents N times
-AudioBufferList.prototype.repeat = function (times) {
-  times = Math.floor(times)
-  if (!times && times !== 0 || !Number.isFinite(times)) throw RangeError('Repeat count must be non-negative number.')
-
-  if (!times) {
-    this.consume(this.length)
-    return this
-  }
-
-  if (times === 1) return this
-
-  var data = this
-  for (var i = 1; i < times; i++) {
-    data = data.slice()
-    this.append(data)
-  }
-
-  return this
-}
-
-
 
 
 //patch BufferList methods
@@ -333,19 +309,62 @@ AudioBufferList.prototype.duplicate = function duplicate () {
 
 
 
-// Remove buffer dep
-
 // Additional methods
 
+//repeat contents N times
+AudioBufferList.prototype.repeat = function (times) {
+  times = Math.floor(times)
+  if (!times && times !== 0 || !Number.isFinite(times)) throw RangeError('Repeat count must be non-negative number.')
 
-// AudioBufferList.prototype.insert = function (what, start) {
+  if (!times) {
+    this.consume(this.length)
+    return this
+  }
 
-// }
+  if (times === 1) return this
 
-// AudioBufferList.prototype.delete = function (from, duration) {
+  var data = this
+  for (var i = 1; i < times; i++) {
+    data = data.slice()
+    this.append(data)
+  }
 
-// }
+  return this
+}
 
-// AudioBufferList.prototype.splice = function (from, del, insert) {
+//insert new buffer/buffers at the offset
+AudioBufferList.prototype.insert = function (source, offset) {
 
-// }
+}
+
+//delete N samples from any position
+AudioBufferList.prototype.delete = function (count, offset) {
+  if (offset == null) offset = 0
+  if (!count) return this
+
+  if (count < 0) {
+    count = -count
+    offset -= count
+  }
+
+  offset = nidx(offset, this.length)
+
+  var offsetsLeft = this._offset(offset)
+  var offsetsRight = this._offset(offset + count)
+
+  //same segment slice
+  var leftBuf = offsetsLeft[1] ? util.slice(this._bufs[offsetsLeft[0]], 0, offsetsLeft[1]) : null;
+  var rightBuf = this._bufs[offsetsRight[0]].length !== offsetsRight[1] ? util.slice(this._bufs[offsetsRight[0]], offsetsRight[1]) : null;
+
+  //delete buffers
+  this._bufs.splice(offsetsLeft[0], offsetsRight[0] - offsetsLeft[0] + 1)
+
+  //insert buffers
+  if (rightBuf) this._bufs.splice(offsetsLeft[0], 0, rightBuf)
+  if (leftBuf) this._bufs.splice(offsetsLeft[0], 0, leftBuf)
+
+  this.length -= count
+  this.duration = this.length / this.sampleRate
+
+  return this
+}

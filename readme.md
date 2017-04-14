@@ -44,6 +44,10 @@ Put data from the `source` _FloatArray_ into channel, optionally starting at `st
 
 Repeats contents of the list specified number of times. Modifies list in-place.
 
+### `list.delete(count, offset=0)`
+
+Delete number of samples starting at the offset. `count` can possibly be negative, then items are deleted on the left side from the offset. `offset` can also be negative, meaning to start from the end.
+
 ## See also
 
 * [audio](https://github.com/audiojs/audio) — high-level class for audio
