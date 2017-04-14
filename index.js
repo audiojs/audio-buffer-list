@@ -334,7 +334,31 @@ AudioBufferList.prototype.repeat = function (times) {
 
 //insert new buffer/buffers at the offset
 AudioBufferList.prototype.insert = function (source, offset) {
+  if (offset == null) return this.append(source)
 
+  offset = nidx(offset, this.length)
+
+  var offsets = this._offset(offset)
+  var leftBuf = offsets[1] ? util.slice(this._bufs[offsets[0]], 0, offsets[1]) : null
+  var rightBuf = offsets[1] !== this._bufs[offsets[0]].length ? util.slice(this._bufs[offsets[0]], offsets[1]) : null
+
+  //convert any type of source to audio buffer list
+  source = new AudioBufferList(source)
+
+  //form new list
+  let bufs = this._bufs.slice(0, offsets[0])
+  if (leftBuf) bufs.push(leftBuf)
+  bufs = bufs.concat(source._bufs)
+  if (rightBuf) bufs.push(rightBuf)
+  bufs = bufs.concat(this._bufs.slice(offsets[0] + 1))
+
+  this._bufs = bufs
+
+  //update params
+  this.length += source.length
+  this.duration += source.duration
+
+  return this
 }
 
 //delete N samples from any position

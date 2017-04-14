@@ -101,6 +101,26 @@ t('delete', t => {
 })
 
 t('insert', t => {
+	var a = new AudioBufferList()
+
+	t.equal(a.length, 0)
+
+	a.insert(util.fill(util.create(10,2), 2))
+
+	t.equal(a.length, 10)
+	t.equal(a.numberOfChannels, 2)
+	t.deepEqual(a.getChannelData(0), Array(10).fill(2))
+
+	a.insert(util.fill(util.create(10,2), (v,i,c) => c), 2)
+
+	t.equal(a.length, 20)
+	t.deepEqual(a.getChannelData(0), Array(2).fill(2).concat(Array(10).fill(0)).concat(Array(8).fill(2)))
+
+	a.insert(util.fill(util.create(10, 2), (v,i,c) => 1-c), -5)
+
+	t.equal(a.length, 30)
+	t.deepEqual(a.getChannelData(1), Array(2).fill(2).concat(Array(10).fill(1)).concat(Array(3).fill(2)).concat(Array(10).fill(0)).concat(Array(5).fill(2)))
+
 	t.end()
 })
 
