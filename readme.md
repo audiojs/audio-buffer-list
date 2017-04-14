@@ -1,6 +1,6 @@
 # audio-buffer-list [![Build Status](https://travis-ci.org/audiojs/audio-buffer-list.svg?branch=master)](https://travis-ci.org/audiojs/audio-buffer-list) [![experimental](http://badges.github.io/stability-badges/dist/experimental.svg)](http://github.com/badges/stability-badges)
 
-Extension of [BufferList](https://npmjs.org/package/bl) for [AudioBuffers](https://npmjs.org/package/audio-buffer). Handy and performant to deal with sequence of audio buffers − accumulate, read, stream, modify, delete etc.
+Extension of [BufferList](https://npmjs.org/package/bl) for [AudioBuffers](https://npmjs.org/package/audio-buffer). Handy and performant to deal with sequence of audio buffers − accumulate, read, stream, modify, delete etc. It provides interfaces both of _AudioBuffer_ and _BufferList_, as well as bunch of other useful methods.
 
 ## Usage
 
@@ -27,6 +27,18 @@ abl.slice() // <AudioBuffer 0, .1, .2, .3, 0...>
 `options` may provide `numberOfChannels`, `context` for web audio API context and `sampleRate`.
 
 `new` is not strictly required.
+
+### `list.getChannelData(channel)`
+
+Return _FloatArray_ with merged data for the channel.
+
+### `list.copyFromChannel(destination, channel, startFrom=0)`
+
+Put data from the channel to destination _FloatArray_. Optional `startFrom` defines offset in the channel to start from.
+
+### `list.repeat(count)`
+
+Repeats contents of the list specified number of times. Modifies list in-place.
 
 ## See also
 

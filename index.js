@@ -54,25 +54,54 @@ function AudioBufferList(callback, options) {
   DuplexStream.call(this, {objectMode: true})
 }
 
+
 //AudioBuffer interface
-AudioBufferList.prototype.numberOfChannels = 2
+AudioBufferList.prototype.numberOfChannels = 0
 AudioBufferList.prototype.sampleRate = context.sampleRate || 44100
 
 //copy from channel into destination array
 AudioBufferList.prototype.copyFromChannel = function (destination, channel, startInChannel) {
-  var offset = this._offset(startInChannel)
-  console.log(offset)
+  if (startInChannel == null) startInChannel = 0
+  var offset = this._offset(startInChannel)[1]
   for (var i = 0, l = this._bufs.length; i < l; i++) {
     var buf = this._bufs[i]
+    var data = buf.getChannelData(channel)
+    if (offset + data.length > destination.length) data = data.subarray(0, destination.length - offset)
     if (channel < buf.numberOfChannels) {
-      destination.set(buf.getChannelData(channel), offset);
+      destination.set(data, offset);
     }
     offset += buf.length
   }
 }
 
+//return float array with channel data
+AudioBufferList.prototype.getChannelData = function (channel) {
+  if (!this._bufs.length) return new Float32Array()
+
+  if (this._bufs.length === 1) return this._bufs[0].getChannelData(channel)
+
+  var floatArray = this._bufs[0].getChannelData(0).constructor
+  var data = new floatArray(this.length)
+
+  var offset = 0
+  for (var i = 0, l = this._bufs.length; i < l; i++) {
+    var buf = this._bufs[i]
+    if (channel < buf.numberOfChannels) {
+      data.set(buf.getChannelData(channel), offset);
+    }
+    offset += buf.length
+  }
+
+  return data
+}
+
+
+
 //repeat contents N times
 AudioBufferList.prototype.repeat = function (times) {
+  times = Math.floor(times)
+  if (!times && times !== 0 || !Number.isFinite(times)) throw RangeError('Repeat count must be non-negative number.')
+
   if (!times) {
     this.consume(this.length)
     return this
@@ -89,8 +118,9 @@ AudioBufferList.prototype.repeat = function (times) {
 }
 
 
-//patch BufferList methods
 
+
+//patch BufferList methods
 AudioBufferList.prototype.append = function (buf) {
 	//FIXME: we may want to do resampling/channel mapping here or something
 	var i = 0
