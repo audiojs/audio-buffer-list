@@ -1,5 +1,7 @@
 # audio-buffer-list [![Build Status](https://travis-ci.org/audiojs/audio-buffer-list.svg?branch=master)](https://travis-ci.org/audiojs/audio-buffer-list) [![experimental](http://badges.github.io/stability-badges/dist/experimental.svg)](http://github.com/badges/stability-badges)
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/audiojs/audio-buffer-list.svg)](https://greenkeeper.io/)
+
 Extension of [BufferList](https://npmjs.org/package/bl) for [AudioBuffers](https://npmjs.org/package/audio-buffer). Handy and performant to deal with sequence of audio buffers − accumulate, read, stream, modify, delete etc. It provides interfaces both of _AudioBuffer_ and _BufferList_, as well as bunch of other useful methods.
 
 ## Usage
