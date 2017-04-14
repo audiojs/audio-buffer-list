@@ -257,15 +257,15 @@ AudioBufferList.prototype.consume = function consume (bytes) {
     if (bytes >= this._bufs[0].length) {
       bytes -= this._bufs[0].length
       this.length -= this._bufs[0].length
-      this.duration -= this._bufs[0].duration
       this._bufs.shift()
     } else {
-      this._bufs[0] = util.slice(this._bufs[0], bytes)
+      //util.subbuffer would remain buffer in memory though it is faster
+      this._bufs[0] = util.subbuffer(this._bufs[0], bytes)
       this.length -= bytes
-      this.duration -= this._bufs[0].duration
       break
     }
   }
+  this.duration = this.length / this.sampleRate
   return this
 }
 
@@ -339,8 +339,8 @@ AudioBufferList.prototype.insert = function (source, offset) {
   offset = nidx(offset, this.length)
 
   var offsets = this._offset(offset)
-  var leftBuf = offsets[1] ? util.slice(this._bufs[offsets[0]], 0, offsets[1]) : null
-  var rightBuf = offsets[1] !== this._bufs[offsets[0]].length ? util.slice(this._bufs[offsets[0]], offsets[1]) : null
+  var leftBuf = offsets[1] ? util.subbuffer(this._bufs[offsets[0]], 0, offsets[1]) : null
+  var rightBuf = offsets[1] !== this._bufs[offsets[0]].length ? util.subbuffer(this._bufs[offsets[0]], offsets[1]) : null
 
   //convert any type of source to audio buffer list
   source = new AudioBufferList(source)
@@ -377,8 +377,8 @@ AudioBufferList.prototype.delete = function (count, offset) {
   var offsetsRight = this._offset(offset + count)
 
   //same segment slice
-  var leftBuf = offsetsLeft[1] ? util.slice(this._bufs[offsetsLeft[0]], 0, offsetsLeft[1]) : null;
-  var rightBuf = this._bufs[offsetsRight[0]].length !== offsetsRight[1] ? util.slice(this._bufs[offsetsRight[0]], offsetsRight[1]) : null;
+  var leftBuf = offsetsLeft[1] ? util.subbuffer(this._bufs[offsetsLeft[0]], 0, offsetsLeft[1]) : null;
+  var rightBuf = this._bufs[offsetsRight[0]].length !== offsetsRight[1] ? util.subbuffer(this._bufs[offsetsRight[0]], offsetsRight[1]) : null;
 
   //delete buffers
   this._bufs.splice(offsetsLeft[0], offsetsRight[0] - offsetsLeft[0] + 1)
