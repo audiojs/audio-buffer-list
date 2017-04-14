@@ -22,11 +22,11 @@ abl.slice() // <AudioBuffer 0, .1, .2, .3, 0...>
 
 ### `new AudioBufferList(source, options?)`
 
+Creates new audio buffer list instance, `new` is not strictly required.
+
 `source` can be _AudioBuffer_, _AudioBuffer_ array, _AudioBufferList_, _AudioBufferList_ array or callback.
 
 `options` may provide `numberOfChannels`, `context` for web audio API context and `sampleRate`.
-
-`new` is not strictly required.
 
 ### `list.insert(buffer, offset=0)`
 
@@ -42,7 +42,7 @@ Repeats contents of the list specified number of times. Modifies list in-place.
 
 
 
-## AudioBuffer properties & methods
+## [AudioBuffer](https://github.com/audiojs/audio-buffer) properties & methods
 
 ### `list.duration`
 
@@ -70,7 +70,7 @@ Put data from the `source` _FloatArray_ into channel, optionally starting at `st
 
 
 
-## BufferList properties and methods
+## [BufferList](https://github.com/rvagg/bl) properties and methods
 
 ### `list.length`
 
@@ -78,18 +78,31 @@ Total length of list in samples, i.e. sum of inner buffer lengths.
 
 ### `list.append(buffer)`
 
-### `list.slice(start?, end?)`
+Insert new AudioBuffer, AudioBufferList or array of them to the end.
 
-### `list.shallowSlice(start?, end?)`
+### `list.slice(start=0, end=-0)`
+
+Return merged AudioBuffer representing indicated interval.
+
+### `list.shallowSlice(start=0, end=-0)`
+
+Return sublist — a handle for the data of the indicated interval.
 
 ### `list.get(idx, channel)`
 
+Get single sample value at the coordinate.
+
 ### `list.duplicate()`
+
+Create new AudioBufferList consisting of the same AudioBuffers as the initial list.
 
 ### `list.copy(dest, destStart?, srcStart?, srcEnd?)`
 
+Put data into destination AudioBuffer.
+
 ### `list.consume(length)`
 
+Delete data from the beginning.
 
 
 ## Stream methods
