@@ -40,6 +40,9 @@ Delete number of samples starting at the offset. `count` can possibly be negativ
 
 Repeats contents of the list specified number of times. Modifies list in-place.
 
+### `list.map((buffer, index) => buffer)`
+
+Create new list by mapping every buffer.
 
 
 ## [AudioBuffer](https://github.com/audiojs/audio-buffer) properties & methods
@@ -82,7 +85,7 @@ Insert new AudioBuffer, AudioBufferList or array of them to the end.
 
 ### `list.slice(start=0, end=-0)`
 
-Return merged AudioBuffer representing indicated interval.
+Return merged _AudioBuffer_ representing indicated interval.
 
 ### `list.shallowSlice(start=0, end=-0)`
 

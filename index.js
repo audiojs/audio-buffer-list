@@ -392,3 +392,8 @@ AudioBufferList.prototype.delete = function (count, offset) {
 
   return this
 }
+
+//return new buffer by mapping it
+AudioBufferList.prototype.map = function map (fn) {
+  return new AudioBufferList(this._bufs.map(fn))
+}

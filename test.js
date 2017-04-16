@@ -27,6 +27,19 @@ t('repeat', t => {
 	t.end()
 })
 
+t('map', t => {
+  let list = new AudioBufferList([util.fill(util.create(1024), 1), util.fill(util.create(1024), 0)])
+
+  let dest = list.map((b, idx) => {
+    return util.fill(b, idx)
+  })
+
+  // console.log(dest.getChannelData(0))
+  t.deepEqual(dest.getChannelData(0), Array(1024).fill(0).concat(Array(1024).fill(1)))
+  t.deepEqual(dest.getChannelData(1), Array(1024).fill(0).concat(Array(1024).fill(1)))
+
+  t.end()
+})
 
 
 //AudioBuffer methods/props
