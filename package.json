@@ -38,7 +38,8 @@
     "inherits": "^2.0.3",
     "is-audio-buffer": "^1.0.5",
     "negative-index": "^1.0.2",
-    "object-assign": "^4.1.1"
+    "object-assign": "^4.1.1",
+    "readable-stream": "^2.2.9"
   },
   "devDependencies": {
     "audio-through": "^2.2.2",
