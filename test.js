@@ -52,6 +52,11 @@ t('map', t => {
   list3 = list3.map((b, idx) => {return b}, 0, 4)
   t.equal(list3.length, 4)
 
+  //upd channels
+  let list4 = new AudioBufferList([AudioBuffer(1, 1), AudioBuffer(2, 1)])
+  list4 = list4.map(buf => AudioBuffer(3, 1))
+  t.equal(list4.numberOfChannels, 3)
+
   t.end()
 })
 

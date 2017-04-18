@@ -411,9 +411,18 @@ AudioBufferList.prototype.map = function map (fn, from, to) {
   if (before || after) middle = this.shallowSlice(from, to)
   else middle = this
 
-  middle._bufs = middle._bufs.map(fn)
+  let maxChannels = 0
+  middle._bufs = middle._bufs.map((buf, idx) => {
+    buf = fn.call(this, buf, idx, this._bufs, this)
+    if (buf.numberOfChannels > maxChannels) maxChannels = buf.numberOfChannels
+    return buf
+  })
   if (before) middle = before.append(middle)
   if (after) middle = middle.append(after)
+
+  if (!before && !after) {
+    this.numberOfChannels = maxChannels
+  }
 
   return middle
 }
