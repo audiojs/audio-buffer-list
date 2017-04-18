@@ -231,12 +231,17 @@ AudioBufferList.prototype.copy = function copy (dst, dstStart, srcStart, srcEnd)
 
 AudioBufferList.prototype.shallowSlice = function shallowSlice (start, end) {
   start = start || 0
-  end = end || this.length
+  end = end == null ? this.length : end
 
   if (start < 0)
     start += this.length
   if (end < 0)
     end += this.length
+
+  if (start == end) {
+    let res = new AudioBufferList([], {context: this.context})
+    return res
+  }
 
   var startOffset = this._offset(start)
     , endOffset = this._offset(end)
@@ -407,7 +412,6 @@ AudioBufferList.prototype.map = function map (fn, from, to) {
   else middle = this
 
   middle._bufs = middle._bufs.map(fn)
-
   if (before) middle = before.append(middle)
   if (after) middle = middle.append(after)
 

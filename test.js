@@ -47,6 +47,11 @@ t('map', t => {
 
   t.deepEqual(dest2.getChannelData(1), Array(512).fill(0).concat(Array(1024).fill(1)).concat(Array(512).fill(0)))
 
+  //subset length
+  let list3 = new AudioBufferList(new AudioBuffer(1, [0,1,0,-1]))
+  list3 = list3.map((b, idx) => {return b}, 0, 4)
+  t.equal(list3.length, 4)
+
   t.end()
 })
 
