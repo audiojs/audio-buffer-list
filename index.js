@@ -96,6 +96,7 @@ AudioBufferList.prototype.copyToChannel = function (source, channel, startInChan
 AudioBufferList.prototype.getChannelData = function (channel) {
   if (!this._bufs.length) return new Float32Array()
 
+  //shortcut single buffer preserving subarraying
   if (this._bufs.length === 1) return this._bufs[0].getChannelData(channel)
 
   var floatArray = this._bufs[0].getChannelData(0).constructor
@@ -394,7 +395,22 @@ AudioBufferList.prototype.delete = function (count, offset) {
 }
 
 //return new buffer by mapping it
-AudioBufferList.prototype.map = function map (fn) {
-  return new AudioBufferList(this._bufs.map(fn))
+AudioBufferList.prototype.map = function map (fn, from, to) {
+  let before, after, middle
+  if (from != null) {
+    before = this.shallowSlice(0, from)
+  }
+  if (to != null) {
+    after = this.shallowSlice(to)
+  }
+  if (before || after) middle = this.shallowSlice(from, to)
+  else middle = this
+
+  middle._bufs = middle._bufs.map(fn)
+
+  if (before) middle = before.append(middle)
+  if (after) middle = middle.append(after)
+
+  return middle
 }
 

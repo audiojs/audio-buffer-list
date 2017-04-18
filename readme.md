@@ -40,9 +40,9 @@ Delete number of samples starting at the offset. `count` can possibly be negativ
 
 Repeats contents of the list specified number of times. Modifies list in-place.
 
-### `list.map((buffer, index) => buffer)`
+### `list.map((buffer, index) => buffer, from=0, to=-0)`
 
-Create new list by mapping every buffer.
+Create new list by mapping every buffer. Optionally pass offsets `from` and `to` to map only subset.
 
 
 ## [AudioBuffer](https://github.com/audiojs/audio-buffer) properties & methods
