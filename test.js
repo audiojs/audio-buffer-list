@@ -28,24 +28,25 @@ t('repeat', t => {
 })
 
 t('map', t => {
+
   //full map
-  let list = new AudioBufferList([util.fill(util.create(1024), 1), util.fill(util.create(1024), 0)])
+  let list = new AudioBufferList([util.fill(util.create(2), 1), util.fill(util.create(2), 0)])
 
   let dest = list.map((b, idx) => {
     return util.fill(b, idx)
   })
 
-  t.deepEqual(dest.getChannelData(0), Array(1024).fill(0).concat(Array(1024).fill(1)))
-  t.deepEqual(dest.getChannelData(1), Array(1024).fill(0).concat(Array(1024).fill(1)))
+  t.deepEqual(dest.getChannelData(0), Array(2).fill(0).concat(Array(2).fill(1)))
+  t.deepEqual(dest.getChannelData(1), Array(2).fill(0).concat(Array(2).fill(1)))
 
   //subset map
-  let list2 = new AudioBufferList([util.fill(util.create(1024), 0), util.fill(util.create(1024), 0)])
+  let list2 = new AudioBufferList([util.fill(util.create(4), 0), util.fill(util.create(4), 0)])
 
-  let dest2 = list2.map((b, idx) => {
-    return util.fill(b, 1)
-  }, 512, 1024+512)
+  let dest2 = list2.map((b, idx, offset) => {
+    return util.fill(b, 1, Math.max(2 - offset, 0), Math.min(6 - offset, b.length))
+  }, 2, 6)
 
-  t.deepEqual(dest2.getChannelData(1), Array(512).fill(0).concat(Array(1024).fill(1)).concat(Array(512).fill(0)))
+  t.deepEqual(dest2.getChannelData(1), Array(2).fill(0).concat(Array(4).fill(1)).concat(Array(2).fill(0)))
 
   //subset length
   let list3 = new AudioBufferList(new AudioBuffer(1, [0,1,0,-1]))
@@ -57,6 +58,25 @@ t('map', t => {
   list4 = list4.map(buf => AudioBuffer(3, 1))
   t.equal(list4.numberOfChannels, 3)
 
+  //change itself
+  //track offset
+  //filter null/zeros
+  //recalculates length & duration
+  let list5 = AudioBufferList([AudioBuffer(1, [1,1]), AudioBuffer(1, [.5,.5]), AudioBuffer(1,[-1,-1])])
+
+  let list5res = list5.map((buf, idx, offset) => {
+    if (idx === 0) t.equal(offset, 0)
+    else if (idx === 2) t.equal(offset, 2)
+
+    if (idx === 1) {
+      buf.copyToChannel([0,0], 0)
+      return null
+    }
+  })
+  t.deepEqual(list5.length, 6)
+  t.deepEqual(list5.getChannelData(0), [1,1,0,0,-1,-1])
+  t.deepEqual(list5res.length, 4)
+  t.deepEqual(list5res.getChannelData(0), [1,1,-1,-1])
   t.end()
 })
 
@@ -78,6 +98,14 @@ t('AudioBuffer properties', t => {
 	t.end()
 })
 
+t.only('getChannelData', function (t) {
+  let bl = new AudioBufferList(AudioBuffer(2, 2), AudioBuffer(2, 2), AudioBuffer(2, 2))
+
+  t.equal(bl.getChannelData(0).length, 6)
+  t.equal(bl.getChannelData(0, 2, 4).length, 2)
+
+  t.end()
+})
 
 t('copyToChannel', function (t) {
 	var a = new AudioBufferList(new AudioBuffer(2, 20)).repeat(2);
@@ -94,7 +122,7 @@ t('copyToChannel', function (t) {
 
 	t.deepEqual(arr, a.getChannelData(1));
 	t.end()
-});
+})
 
 t('copyFromChannel', function (t) {
 	var a = new AudioBufferList(util.fill(util.create(20, 2), (v, idx, channel) => channel ? 1 : -1)).repeat(2);
@@ -108,7 +136,7 @@ t('copyFromChannel', function (t) {
 	t.deepEqual(arr, result);
 
 	t.end()
-});
+})
 
 
 t('delete', t => {

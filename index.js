@@ -13,7 +13,6 @@ var util = require('audio-buffer-utils')
 var AudioBuffer = require('audio-buffer')
 var DuplexStream = require('readable-stream/duplex')
 var extend = require('object-assign')
-var context = require('audio-context')
 var nidx = require('negative-index')
 
 module.exports = AudioBufferList
@@ -58,7 +57,7 @@ function AudioBufferList(callback, options) {
 
 //AudioBuffer interface
 AudioBufferList.prototype.numberOfChannels = 0
-AudioBufferList.prototype.sampleRate = context.sampleRate || 44100
+AudioBufferList.prototype.sampleRate = null
 
 //copy from channel into destination array
 AudioBufferList.prototype.copyFromChannel = function (destination, channel, startInChannel) {
@@ -93,7 +92,7 @@ AudioBufferList.prototype.copyToChannel = function (source, channel, startInChan
 }
 
 //return float array with channel data
-AudioBufferList.prototype.getChannelData = function (channel) {
+AudioBufferList.prototype.getChannelData = function (channel, from, to) {
   if (!this._bufs.length) return new Float32Array()
 
   //shortcut single buffer preserving subarraying
@@ -146,7 +145,7 @@ AudioBufferList.prototype.append = function (buf) {
 }
 
 AudioBufferList.prototype._appendBuffer = function (buf) {
-  if (buf.sampleRate != this.sampleRate) throw Error('Required sample rate is ' + this.sampleRate + ', passed ' + buf.sampleRate)
+  // if (buf.sampleRate != this.sampleRate) throw Error('Required sample rate is ' + this.sampleRate + ', passed ' + buf.sampleRate)
 
   BufferList.prototype._appendBuffer.call(this, buf)
 
@@ -154,6 +153,9 @@ AudioBufferList.prototype._appendBuffer = function (buf) {
   //update channels count
   this.numberOfChannels = Math.max(this.numberOfChannels, buf.numberOfChannels)
   this.duration += buf.duration
+
+  //init sampleRate
+  if (!this.sampleRate) this.sampleRate = buf.sampleRate
 
   return this
 }
@@ -239,7 +241,7 @@ AudioBufferList.prototype.shallowSlice = function shallowSlice (start, end) {
     end += this.length
 
   if (start == end) {
-    let res = new AudioBufferList([], {context: this.context})
+    let res = new AudioBufferList([])
     return res
   }
 
@@ -275,15 +277,16 @@ AudioBufferList.prototype.consume = function consume (bytes) {
   return this
 }
 
+//clone with preserving data
 AudioBufferList.prototype.duplicate = function duplicate () {
-  var i = 0
-    , copy = new AudioBufferList()
+  var i = 0, copy = new AudioBufferList()
 
   for (; i < this._bufs.length; i++)
     copy.append(this._bufs[i])
 
   return copy
 }
+
 
 
 ;(function () {
@@ -399,31 +402,42 @@ AudioBufferList.prototype.delete = function (count, offset) {
   return this
 }
 
-//return new buffer by mapping it
+//return new list via applying fn to each buffer from the indicated range
 AudioBufferList.prototype.map = function map (fn, from, to) {
-  let before, after, middle
-  if (from != null) {
-    before = this.shallowSlice(0, from)
-  }
-  if (to != null) {
-    after = this.shallowSlice(to)
-  }
-  if (before || after) middle = this.shallowSlice(from, to)
-  else middle = this
+  if (from == null) from = 0
+  if (to == null) to = this.length
+  from = nidx(from, this.length)
+  to = nidx(to, this.length)
 
-  let maxChannels = 0
-  middle._bufs = middle._bufs.map((buf, idx) => {
-    buf = fn.call(this, buf, idx, this._bufs, this)
-    if (buf.numberOfChannels > maxChannels) maxChannels = buf.numberOfChannels
-    return buf
+  let fromOffset = this._offset(from)
+  let toOffset = this._offset(to)
+
+  let maxChannels = 0, offset = from - fromOffset[1]
+  let before = this._bufs.slice(0, fromOffset[0])
+  let after = this._bufs.slice(toOffset[0] + 1)
+  let middle = this._bufs.slice(fromOffset[0], toOffset[1] + 1)
+
+  middle = middle.map((buf, idx) => {
+    let result = fn.call(this, buf, idx, offset, this._bufs, this)
+    if (result === undefined || result === true) result = buf
+    //ignore removed buffers
+    if (!result) {
+      return null;
+    }
+
+    //track offset
+    offset += result.length
+
+    return result
   })
-  if (before) middle = before.append(middle)
-  if (after) middle = middle.append(after)
+  .filter((buf) => {
+    return buf ? !!buf.length : false
+  })
 
-  if (!before && !after) {
-    this.numberOfChannels = maxChannels
-  }
-
-  return middle
+  return new AudioBufferList(before.concat(middle).concat(after))
 }
 
+//apply fn to every buffer for the indicated range
+AudioBufferList.prototype.each = function each (fn, from, to) {
+
+}

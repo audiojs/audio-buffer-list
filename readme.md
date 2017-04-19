@@ -1,6 +1,6 @@
 # audio-buffer-list [![Build Status](https://travis-ci.org/audiojs/audio-buffer-list.svg?branch=master)](https://travis-ci.org/audiojs/audio-buffer-list) [![experimental](http://badges.github.io/stability-badges/dist/experimental.svg)](http://github.com/badges/stability-badges)
 
-Extension of [BufferList](https://npmjs.org/package/bl) for [AudioBuffers](https://npmjs.org/package/audio-buffer). Handy and performant to deal with sequence of audio buffers − accumulate, read, stream, modify, delete etc. It provides interfaces both of _AudioBuffer_ and _BufferList_, as well as bunch of other useful methods.
+Extension of [BufferList](https://npmjs.org/package/bl) for [AudioBuffers](https://npmjs.org/package/audio-buffer). Handy and performant to deal with (possibly long) sequence of audio buffers − accumulate, read, stream, modify, delete etc. It provides interfaces of both _AudioBuffer_ and _BufferList_, as well as bunch of other useful methods.
 
 ## Usage
 
@@ -40,9 +40,29 @@ Delete number of samples starting at the offset. `count` can possibly be negativ
 
 Repeats contents of the list specified number of times. Modifies list in-place.
 
-### `list.map((buffer, index) => buffer, from=0, to=-0)`
+### `list.map((buffer, index, offset) => buffer|bool?, from=0, to=-0)`
 
-Create new list by mapping every buffer. Optionally pass offsets `from` and `to` to map only subset.
+Create new list by mapping every buffer. Optionally pass offsets `from` and `to` to map only buffers covering the subset, keeping the rest unchanged. If no buffer returned from the mapper function then the old buffer will be preserved. If `null` returned then the buffer will be discarded. `offset` tracks `buffer` offset in new list, `index` reflects buffer count.
+
+```js
+list = list.map((buf, idx, offset) => {
+	for (let c = 0; c < channels; c++) {
+		let data = buf.getChannelData(channel)
+
+		//start buffer from the subset may start earlier than the subset
+		//end buffer from the subset may end later than the subset
+		for (let i = Math.max(from - offset, 0),
+					l = Math.min(to - offset, buf.length);
+					i < l; i++) {
+			data[i] = process(data[i])
+		}
+	}
+}, from, to)
+```
+
+### `list.each((buffer, index, offset) => {}, from=0, to=-0)`
+
+Iterate over buffers from the indicated offset. Buffers can be modified in-place.
 
 
 ## [AudioBuffer](https://github.com/audiojs/audio-buffer) properties & methods
