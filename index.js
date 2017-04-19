@@ -424,7 +424,7 @@ AudioBufferList.prototype.map = function map (fn, from, to) {
   let fromOffset = this._offset(from)
   let toOffset = this._offset(to)
 
-  let maxChannels = 0, offset = from - fromOffset[1]
+  let offset = from - fromOffset[1]
   let before = this._bufs.slice(0, fromOffset[0])
   let after = this._bufs.slice(toOffset[0] + 1)
   let middle = this._bufs.slice(fromOffset[0], toOffset[1] + 1)
@@ -451,5 +451,23 @@ AudioBufferList.prototype.map = function map (fn, from, to) {
 
 //apply fn to every buffer for the indicated range
 AudioBufferList.prototype.each = function each (fn, from, to) {
+  if (from == null) from = 0
+  if (to == null) to = this.length
+  from = nidx(from, this.length)
+  to = nidx(to, this.length)
 
+  let fromOffset = this._offset(from)
+  let toOffset = this._offset(to)
+
+  let offset = from - fromOffset[1]
+
+  let middle = this._bufs.slice(fromOffset[0], toOffset[1] + 1)
+
+  for (let i = fromOffset[0], l = toOffset[0]+1; i < l; i++) {
+    let buf = this._bufs[i]
+    fn.call(this, buf, i, offset, this._bufs, this)
+    offset += buf.length
+  }
+
+  return this;
 }
