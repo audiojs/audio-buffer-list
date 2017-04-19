@@ -62,7 +62,7 @@ list = list.map((buf, idx, offset) => {
 
 ### `list.each((buffer, index, offset) => {}, from=0, to=-0)`
 
-Iterate over buffers from the indicated offset. Buffers can be modified in-place.
+Iterate over buffers from the indicated range. Buffers can be modified in-place during the iterating.
 
 
 ## [AudioBuffer](https://github.com/audiojs/audio-buffer) properties & methods
