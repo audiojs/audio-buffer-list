@@ -93,22 +93,34 @@ AudioBufferList.prototype.copyToChannel = function (source, channel, startInChan
 
 //return float array with channel data
 AudioBufferList.prototype.getChannelData = function (channel, from, to) {
-  if (!this._bufs.length) return new Float32Array()
+  if (from == null) from = 0
+  if (to == null) to = this.length
+  from = nidx(from, this.length)
+  to = nidx(to, this.length)
+
+  if (!this._bufs.length || from === to) return new Float32Array()
 
   //shortcut single buffer preserving subarraying
-  if (this._bufs.length === 1) return this._bufs[0].getChannelData(channel)
+  if (this._bufs.length === 1) {
+    return this._bufs[0].getChannelData(channel).subarray(from, to)
+  }
 
   var floatArray = this._bufs[0].getChannelData(0).constructor
-  var data = new floatArray(this.length)
+  var data = new floatArray(to - from)
+  var fromOffset = this._offset(from)
+  var toOffset = this._offset(to)
 
-  var offset = 0
-  for (var i = 0, l = this._bufs.length; i < l; i++) {
+  var firstBuf = this._bufs[fromOffset[0]]
+  data.set(firstBuf.getChannelData(channel).subarray(fromOffset[1]))
+
+  var offset = -fromOffset[1] + firstBuf.length
+  for (var i = fromOffset[0] + 1, l = toOffset[0]; i < l; i++) {
     var buf = this._bufs[i]
-    if (channel < buf.numberOfChannels) {
-      data.set(buf.getChannelData(channel), offset);
-    }
+    data.set(buf.getChannelData(channel), offset);
     offset += buf.length
   }
+  var lastBuf = this._bufs[toOffset[0]]
+  data.set(lastBuf.getChannelData(channel).subarray(0, toOffset[1]), offset)
 
   return data
 }

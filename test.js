@@ -98,10 +98,11 @@ t('AudioBuffer properties', t => {
 	t.end()
 })
 
-t.only('getChannelData', function (t) {
-  let bl = new AudioBufferList(AudioBuffer(2, 2), AudioBuffer(2, 2), AudioBuffer(2, 2))
+t('getChannelData', function (t) {
+  let bl = new AudioBufferList([AudioBuffer(2, 2), AudioBuffer(2, 2), AudioBuffer(2, 2)])
 
   t.equal(bl.getChannelData(0).length, 6)
+  t.equal(bl.getChannelData(0, 3).length, 3)
   t.equal(bl.getChannelData(0, 2, 4).length, 2)
 
   t.end()
