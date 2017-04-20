@@ -1,6 +1,6 @@
 {
   "name": "audio-buffer-list",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Data structure for sequence of AudioBuffers",
   "main": "index.js",
   "scripts": {
