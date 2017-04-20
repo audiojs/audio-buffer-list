@@ -598,9 +598,9 @@ t('shallow slice across buffer boundaries', function (t) {
 })
 
 t('shallow slice within single buffer', function (t) {
-  var bl = new AudioBufferList([AudioBuffer(1, [0,0,0,0,0]), AudioBuffer(1, [1,1,1,1,1,1]), AudioBuffer(1, [2,2,2,2,2])])
+  var bl = new AudioBufferList(AudioBuffer(1, [0,1,2,3,4,5,6,7,8]))
 
-  t.deepEqual(bl.shallowSlice(5, 10).getChannelData(0), [1,1,1,1,1])
+  t.deepEqual(bl.shallowSlice(3, 6).getChannelData(0), [3,4,5])
   t.end()
 })
 

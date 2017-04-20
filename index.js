@@ -246,27 +246,27 @@ AudioBufferList.prototype.shallowSlice = function shallowSlice (start, end) {
   start = start || 0
   end = end == null ? this.length : end
 
-  if (start < 0)
-    start += this.length
-  if (end < 0)
-    end += this.length
+  start = nidx(start, this.length)
+  end = nidx(end, this.length)
 
   if (start == end) {
-    let res = new AudioBufferList([])
-    return res
+    return new AudioBufferList()
   }
 
   var startOffset = this._offset(start)
     , endOffset = this._offset(end)
     , buffers = this._bufs.slice(startOffset[0], endOffset[0] + 1)
 
-  if (startOffset[1] != 0)
-    buffers[0] = util.subbuffer(buffers[0], startOffset[1])
-
-  if (endOffset[1] == 0)
+  if (endOffset[1] == 0) {
     buffers.pop()
-  else
+  }
+  else {
     buffers[buffers.length-1] = util.subbuffer(buffers[buffers.length-1], 0, endOffset[1])
+  }
+
+  if (startOffset[1] != 0) {
+    buffers[0] = util.subbuffer(buffers[0], startOffset[1])
+  }
 
   return new AudioBufferList(buffers)
 }
