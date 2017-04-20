@@ -141,6 +141,12 @@ t('each', t => {
   t.end()
 })
 
+t('Reverse', t => {
+
+
+  t.end()
+})
+
 
 //AudioBuffer methods/props
 t('AudioBuffer properties', t => {
@@ -170,16 +176,16 @@ t('getChannelData', function (t) {
 })
 
 t('copyToChannel', function (t) {
-	var a = new AudioBufferList(new AudioBuffer(2, 20)).repeat(2);
-	var arr = new Float32Array(40);
+	var a = new AudioBufferList(new AudioBuffer(2, 2)).repeat(2);
+	var arr = new Float32Array(4);
 	arr.fill(-1);
 
 	a.copyToChannel(arr, 0, 0);
 	t.deepEqual(arr, a.getChannelData(0));
 
-	a.copyToChannel(arr, 1, 10);
+	a.copyToChannel(arr, 1, 1);
 
-	var zeros = new Float32Array(10);
+	var zeros = new Float32Array(1);
 	arr.set(zeros);
 
 	t.deepEqual(arr, a.getChannelData(1));
@@ -249,21 +255,21 @@ t('insert', t => {
 
 
 //bl patch methods
-t('single bytes from single buffer', function (t) {
+t.skip('single bytes from single buffer', function (t) {
   var bl = new AudioBufferList()
   bl.append(new AudioBuffer(1, [0,1,2,3]))
 
   t.equal(bl.length, 4)
 
-  t.equal(bl.get(0, 0), 0)
-  t.equal(bl.get(1, 0), 1)
-  t.equal(bl.get(2, 0), 2)
-  t.equal(bl.get(3, 0), 3)
+  t.equal(bl.get(0)[0], 0)
+  t.equal(bl.get(1)[0], 1)
+  t.equal(bl.get(2)[0], 2)
+  t.equal(bl.get(3)[0], 3)
 
   t.end()
 })
 
-t('single bytes from multiple buffers', function (t) {
+t.skip('single bytes from multiple buffers', function (t) {
   var bl = new AudioBufferList()
   bl.append(new AudioBuffer(1, [1,2,3,4]))
   bl.append(new AudioBuffer(1, [5,6,7]))
@@ -463,7 +469,7 @@ t('complete consumption', function (t) {
   bl.consume(2)
 
   t.equal(bl.length, 0)
-  t.equal(bl._bufs.length, 0)
+  t.equal(bl.buffers.length, 0)
 
   t.end()
 })
@@ -501,29 +507,6 @@ t('test readUInt16LE / readUInt16BE / readInt16LE / readInt16BE', function (t) {
   t.end()
 })
 
-
-t('write nothing, should get empty buffer', function (t) {
-  t.plan(3)
-  AudioBufferList(function (err, data) {
-    t.notOk(err, 'no error')
-    t.ok(isAudioBuffer(data), 'got a buffer')
-    t.equal(0, data.length, 'got a min-length buffer')
-    t.end()
-  }).end()
-})
-
-t('should emit finish', function (t) {
-  var source = AudioBufferList()
-    , dest = AudioBufferList()
-
-  source.write(AudioBuffer(1))
-  source.pipe(dest)
-
-  dest.on('finish', function () {
-    t.equal(dest.length, 1)
-    t.end()
-  })
-})
 
 t('basic copy', function (t) {
   var buf  = util.noise(util.create(1024))
@@ -650,90 +633,6 @@ t('destroy no pipe', function (t) {
   var bl = new AudioBufferList(new AudioBuffer(1, [0,1,0,1,0,1,0,1]))
   bl.destroy()
 
-  t.equal(bl._bufs.length, 0)
+  t.equal(bl.buffers.length, 0)
   t.equal(bl.length, 0)
-})
-
-!process.browser && t.skip('destroy with pipe before read end', function (t) {
-  t.plan(2)
-
-  var bl = new AudioBufferList()
-  fs.createReadStream(__dirname + '/test.js')
-    .pipe(bl)
-
-  bl.destroy()
-
-  t.equal(bl._bufs.length, 0)
-  t.equal(bl.length, 0)
-
-})
-
-!process.browser && t.skip('destroy with pipe before read end with race', function (t) {
-  t.plan(2)
-
-  var bl = new AudioBufferList()
-  fs.createReadStream(__dirname + '/test.js')
-    .pipe(bl)
-
-  setTimeout(function () {
-    bl.destroy()
-    setTimeout(function () {
-      t.equal(bl._bufs.length, 0)
-      t.equal(bl.length, 0)
-    }, 500)
-  }, 500)
-})
-
-!process.browser && t.skip('destroy with pipe after read end', function (t) {
-  t.plan(2)
-
-  var bl = new AudioBufferList()
-  fs.createReadStream(__dirname + '/test.js')
-    .on('end', onEnd)
-    .pipe(bl)
-
-  function onEnd () {
-    bl.destroy()
-
-    t.equal(bl._bufs.length, 0)
-    t.equal(bl.length, 0)
-  }
-})
-
-!process.browser && t('destroy with pipe while writing to a destination', function (t) {
-  t.plan(4)
-
-  var bl = new AudioBufferList()
-    , ds = new AudioBufferList()
-
-  // fs.createReadStream(__dirname + '/test.js')
-    Through(function (v) {return this.count > 1000 ? this.end() : new AudioBuffer(1, 1024)})
-    .on('end', onEnd)
-    .pipe(bl)
-
-  function onEnd () {
-    bl.pipe(ds)
-
-    setTimeout(function () {
-      bl.destroy()
-
-      t.equals(bl._bufs.length, 0)
-      t.equals(bl.length, 0)
-
-      ds.destroy()
-
-      t.equals(bl._bufs.length, 0)
-      t.equals(bl.length, 0)
-
-    }, 100)
-  }
-})
-
-
-!process.browser && t('handle error', function (t) {
-  t.plan(2)
-  fs.createReadStream('/does/not/exist').pipe(AudioBufferList(function (err, data) {
-    t.ok(err instanceof Error, 'has error')
-    t.notOk(data, 'no data')
-  }))
 })
