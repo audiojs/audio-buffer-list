@@ -37,6 +37,7 @@
     "bl": "^1.2.0",
     "inherits": "^2.0.3",
     "is-audio-buffer": "^1.0.5",
+    "is-plain-obj": "^1.1.0",
     "negative-index": "^1.0.2",
     "object-assign": "^4.1.1",
     "readable-stream": "^2.2.9"
