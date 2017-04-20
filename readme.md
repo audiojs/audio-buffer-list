@@ -60,10 +60,9 @@ list = list.map((buf, idx, offset) => {
 }, from, to)
 ```
 
-### `list.each((buffer, index, offset) => {}, from=0, to=-0)`
+### `list.each((buffer, index, offset) => {}, from=0, to=-0, {reversed}?)`
 
-Iterate over buffers from the indicated range. Buffers can be modified in-place during the iterating.
-
+Iterate over buffers from the indicated range. Buffers can be modified in-place during the iterating. Return `false` to break loop. Pass `{reversed: true}` as the last argument to iterate in reverse order.
 
 ## [AudioBuffer](https://github.com/audiojs/audio-buffer) properties & methods
 

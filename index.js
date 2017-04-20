@@ -14,6 +14,7 @@ var AudioBuffer = require('audio-buffer')
 var DuplexStream = require('readable-stream/duplex')
 var extend = require('object-assign')
 var nidx = require('negative-index')
+var isPlainObj = require('is-plain-obj')
 
 module.exports = AudioBufferList
 
@@ -26,7 +27,7 @@ function AudioBufferList(callback, options) {
 
   extend(this, options)
 
-  this._bufs  = []
+  this._bufs = []
   this.length = 0
   this.duration = 0
 
@@ -146,10 +147,7 @@ AudioBufferList.prototype.append = function (buf) {
   }
   //create AudioBuffer from arg
   else if (buf != null) {
-    if (typeof buf == 'number') {
-      buf = [buf]
-    }
-		buf = new AudioBuffer(this.numberOfChannels, buf)
+		buf = new AudioBuffer(this.numberOfChannels || 2, buf)
 		this._appendBuffer(buf)
 	}
 
@@ -174,7 +172,8 @@ AudioBufferList.prototype._appendBuffer = function (buf) {
 
 //get method here returns audio buffer with single sample if it makes any sense
 AudioBufferList.prototype.get = function get (index, channel) {
-  return this.slice(index, index + 1).getChannelData(channel || 0)[0]
+  let offset = this._offset(index)
+  return this._bufs[offset[0]].getChannelData(channel || 0)[offset[1]]
 }
 
 //copy data to destination audio buffer
@@ -345,8 +344,9 @@ AudioBufferList.prototype.repeat = function (times) {
   if (times === 1) return this
 
   var data = this
+
   for (var i = 1; i < times; i++) {
-    data = data.slice()
+    data = new AudioBufferList(data.slice())
     this.append(data)
   }
 
@@ -402,7 +402,7 @@ AudioBufferList.prototype.delete = function (count, offset) {
   var rightBuf = this._bufs[offsetsRight[0]].length !== offsetsRight[1] ? util.subbuffer(this._bufs[offsetsRight[0]], offsetsRight[1]) : null;
 
   //delete buffers
-  this._bufs.splice(offsetsLeft[0], offsetsRight[0] - offsetsLeft[0] + 1)
+  let deleted = this._bufs.splice(offsetsLeft[0], offsetsRight[0] - offsetsLeft[0] + 1)
 
   //insert buffers
   if (rightBuf) this._bufs.splice(offsetsLeft[0], 0, rightBuf)
@@ -411,7 +411,7 @@ AudioBufferList.prototype.delete = function (count, offset) {
   this.length -= count
   this.duration = this.length / this.sampleRate
 
-  return this
+  return deleted
 }
 
 //return new list via applying fn to each buffer from the indicated range
@@ -450,23 +450,37 @@ AudioBufferList.prototype.map = function map (fn, from, to) {
 }
 
 //apply fn to every buffer for the indicated range
-AudioBufferList.prototype.each = function each (fn, from, to) {
-  if (from == null) from = 0
-  if (to == null) to = this.length
+AudioBufferList.prototype.each = function each (fn, from, to, reversed) {
+  let options = arguments[arguments.length - 1]
+  if (!isPlainObj(options)) options = {reversed: false}
+
+  if (typeof from != 'number') from = 0
+  if (typeof to != 'number') to = this.length
   from = nidx(from, this.length)
   to = nidx(to, this.length)
 
   let fromOffset = this._offset(from)
   let toOffset = this._offset(to)
 
-  let offset = from - fromOffset[1]
-
   let middle = this._bufs.slice(fromOffset[0], toOffset[1] + 1)
 
-  for (let i = fromOffset[0], l = toOffset[0]+1; i < l; i++) {
-    let buf = this._bufs[i]
-    fn.call(this, buf, i, offset, this._bufs, this)
-    offset += buf.length
+  if (options.reversed) {
+    let offset = to - toOffset[1]
+    for (let i = toOffset[0], l = fromOffset[0]; i >= l; i--) {
+      let buf = this._bufs[i]
+      let res = fn.call(this, buf, i, offset, this._bufs, this)
+      if (res === false) break
+      offset -= buf.length
+    }
+  }
+  else {
+    let offset = from - fromOffset[1]
+    for (let i = fromOffset[0], l = toOffset[0]+1; i < l; i++) {
+      let buf = this._bufs[i]
+      let res = fn.call(this, buf, i, offset, this._bufs, this)
+      if (res === false) break
+      offset += buf.length
+    }
   }
 
   return this;

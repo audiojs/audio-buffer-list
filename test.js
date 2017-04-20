@@ -12,17 +12,21 @@ const Through = require('audio-through')
 
 //new methods
 t('repeat', t => {
-	var a = new AudioBufferList(new AudioBuffer(2, 10))
-	a.repeat(0)
-	t.equal(a.length, 0)
+  var a = new AudioBufferList(new AudioBuffer(2, 10))
+  a.repeat(0)
+  t.equal(a.length, 0)
 
-	var b = new AudioBufferList(new AudioBuffer(2, 10))
-	b.repeat(1)
-	t.equal(b.length, 10)
+  var b = new AudioBufferList(new AudioBuffer(2, 10))
+  b.repeat(1)
+  t.equal(b.length, 10)
 
-	var c = new AudioBufferList(new AudioBuffer(2, 10))
-	c.repeat(2)
-	t.equal(c.length, 20)
+  var c = new AudioBufferList(new AudioBuffer(2, 10))
+  c.repeat(2)
+  t.equal(c.length, 20)
+
+  let d = AudioBufferList(2).repeat(4)
+  t.equal(d.numberOfChannels, 2)
+  t.equal(d.length, 8)
 
 	t.end()
 })
@@ -117,6 +121,23 @@ t('each', t => {
   })
   t.deepEqual(list5.length, 6)
   t.deepEqual(list5.getChannelData(0), [1,1,0,0,-1,-1])
+
+  //break vicious cycle
+  let list6 = AudioBufferList(AudioBuffer(1, 2)).repeat(4)
+  list6.each((buf, idx, offset) => {
+    if (idx > 1) return false
+      t.ok(idx <= 1)
+  })
+
+  //do reversed walking
+  let list7 = AudioBufferList(2).repeat(4)
+  t.equal(list7.length, 8)
+  let arr = []
+  list7.each((buf, idx, offset) => {
+    arr.push(idx)
+  }, {reversed: true})
+  t.deepEqual(arr, [3,2,1,0])
+
   t.end()
 })
 
