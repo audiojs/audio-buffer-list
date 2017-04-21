@@ -345,15 +345,16 @@ AudioBufferList.prototype.delete = function (offset, count) {
 
   this.split(offset, offset + count)
 
-  var offsetsLeft = this.offset(offset)
-  var offsetsRight = this.offset(offset + count)
+  var offsetLeft = this.offset(offset)
+  var offsetRight = this.offset(offset + count)
 
-  let deleted = this.buffers.splice(offsetsLeft[0], offsetsRight[0] - offsetsLeft[0])
+  let deleted = this.buffers.splice(offsetLeft[0], offsetRight[0] - offsetLeft[0])
+  deleted = new AudioBufferList(deleted)
 
-  this.length -= count
+  this.length -= deleted.length
   this.duration = this.length / this.sampleRate
 
-  return new AudioBufferList(deleted)
+  return deleted
 }
 
 //remove N sampled from the beginning
