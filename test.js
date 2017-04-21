@@ -244,22 +244,22 @@ t('split/join', t => {
 })
 
 t('delete', t => {
-  // var a = new AudioBufferList([util.fill(util.create(20, 2), (v, idx, channel) => channel), util.fill(util.create(20, 2), (v, idx, channel) => 1 -channel)]);
+  var a = new AudioBufferList([util.fill(util.create(20, 2), (v, idx, channel) => channel), util.fill(util.create(20, 2), (v, idx, channel) => 1 -channel)]);
 
-  // a.delete(10)
-  // t.equal(a.length, 30)
-  // t.deepEqual(a.getChannelData(0), Array(10).fill(0).concat(Array(20).fill(1)))
-  // t.deepEqual(a.getChannelData(1), Array(10).fill(1).concat(Array(20).fill(0)))
+  a.delete(10)
+  t.equal(a.length, 30)
+  t.deepEqual(a.getChannelData(0), Array(10).fill(0).concat(Array(20).fill(1)))
+  t.deepEqual(a.getChannelData(1), Array(10).fill(1).concat(Array(20).fill(0)))
 
-  // a.delete(10, 8)
-  // t.equal(a.length, 20)
-  // t.deepEqual(a.getChannelData(0), Array(8).fill(0).concat(Array(12).fill(1)))
-  // t.deepEqual(a.getChannelData(1), Array(8).fill(1).concat(Array(12).fill(0)))
+  a.delete(8, 10)
+  t.equal(a.length, 20)
+  t.deepEqual(a.getChannelData(0), Array(8).fill(0).concat(Array(12).fill(1)))
+  t.deepEqual(a.getChannelData(1), Array(8).fill(1).concat(Array(12).fill(0)))
 
-  // a.delete(-12)
-  // t.equal(a.length, 8)
-  // t.deepEqual(a.getChannelData(0), Array(8).fill(0))
-  // t.deepEqual(a.getChannelData(1), Array(8).fill(1))
+  a.delete(-12)
+  t.equal(a.length, 8)
+  t.deepEqual(a.getChannelData(0), Array(8).fill(0))
+  t.deepEqual(a.getChannelData(1), Array(8).fill(1))
 
   var b = AudioBufferList([AudioBuffer(1, [0,1,2]), AudioBuffer(1, [3,4,5])])
 

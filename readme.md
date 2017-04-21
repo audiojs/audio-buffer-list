@@ -56,11 +56,11 @@ Return `[bufIdx, offset]` pair for any sample number. `bufIdx` is the number of 
 
 Insert new AudioBuffer, AudioBufferList or array of them to the end.
 
-### `list.insert(buffer, offset=0)`
+### `list.insert(offset=0, buffer)`
 
 Put new AudioBuffer, AudioBufferList or array of them at the offset.
 
-### `list.delete(count, offset=0)`
+### `list.delete(offset=0, count)`
 
 Delete number of samples starting at the `offset`. `count` can possibly be negative, then items are deleted on the left side from the offset. `offset` can also be negative, meaning to start from the end. Retuns deleted _AudioBufferList_.
 

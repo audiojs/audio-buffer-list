@@ -297,8 +297,11 @@ AudioBufferList.prototype.repeat = function (times) {
 }
 
 //insert new buffer/buffers at the offset
-AudioBufferList.prototype.insert = function (source, offset) {
-  if (offset == null) return this.append(source)
+AudioBufferList.prototype.insert = function (offset, source) {
+  if (source == null) {
+    source = offset
+    offset = 0
+  }
 
   offset = nidx(offset, this.length)
 
@@ -326,8 +329,11 @@ AudioBufferList.prototype.insert = function (source, offset) {
 }
 
 //delete N samples from any position
-AudioBufferList.prototype.delete = function (count, offset) {
-  if (offset == null) offset = 0
+AudioBufferList.prototype.delete = function (offset, count) {
+  if (count == null) {
+    count = offset
+    offset = 0
+  }
   if (!count) return this
 
   if (count < 0) {
@@ -337,26 +343,12 @@ AudioBufferList.prototype.delete = function (count, offset) {
 
   offset = nidx(offset, this.length)
 
-  this.split()
-  let sublist = this.slice(count, count + offset)
+  this.split(offset, offset + count)
 
   var offsetsLeft = this.offset(offset)
-
-
-  /*
   var offsetsRight = this.offset(offset + count)
 
-  //same segment slice
-  var rightBuf = this.buffers[offsetsRight[0]].length !== offsetsRight[1] ? util.subbuffer(this.buffers[offsetsRight[0]], offsetsRight[1]) : null;
-  var leftBuf = offsetsLeft[1] ? util.subbuffer(this.buffers[offsetsLeft[0]], 0, offsetsLeft[1]) : null;
-
-  //delete buffers
-  let deleted = this.buffers.splice(offsetsLeft[0], offsetsRight[0] - offsetsLeft[0] + 1)
-
-  //insert buffers
-  if (rightBuf) this.buffers.splice(offsetsLeft[0], 0, rightBuf)
-  if (leftBuf) this.buffers.splice(offsetsLeft[0], 0, leftBuf)
-  */
+  let deleted = this.buffers.splice(offsetsLeft[0], offsetsRight[0] - offsetsLeft[0])
 
   this.length -= count
   this.duration = this.length / this.sampleRate
