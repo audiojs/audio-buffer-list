@@ -491,3 +491,23 @@ AudioBufferList.prototype.split = function split () {
 
   return this
 }
+
+
+//join buffers within the subrange
+AudioBufferList.prototype.join = function join (from, to) {
+  if (from == null) from = 0
+  if (to == null) to = this.length
+
+  from = nidx(from, this.length)
+  to = nidx(to, this.length)
+
+  let fromOffset = this.offset(from)
+  let toOffset = this.offset(to)
+
+  let bufs = this.buffers.slice(fromOffset[0], toOffset[0])
+  let buf = util.concat(bufs)
+
+  this.buffers.splice.apply(this.buffers, [fromOffset[0], toOffset[0] - fromOffset[0] + (toOffset[1] ? 1 : 0)].concat(buf))
+
+  return this
+}

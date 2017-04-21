@@ -240,6 +240,10 @@ t('split/join', t => {
 
   t.equal(a.buffers.length, 7)
 
+  a.join()
+
+  t.equal(a.buffers.length, 1)
+
   t.end()
 })
 
