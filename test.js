@@ -141,8 +141,8 @@ t('each', t => {
   t.end()
 })
 
-t('Reverse', t => {
-  let list = AudioBufferList([AudioBuffer(1, [0,1,2]), AudioBuffer(1, [3,4,5])])
+t('reverse', t => {
+  let list = AudioBufferList(AudioBuffer(1, [0,1,2, 3,4,5])).split(3)
 
   list.reverse(1,5)
 
@@ -278,18 +278,18 @@ t('insert', t => {
 
 	t.equal(a.length, 0)
 
-	a.insert(util.fill(util.create(10,2), 2))
+	a.insert(2, util.fill(util.create(10,2), 2))
 
 	t.equal(a.length, 10)
 	t.equal(a.numberOfChannels, 2)
 	t.deepEqual(a.getChannelData(0), Array(10).fill(2))
 
-	a.insert(util.fill(util.create(10,2), (v,i,c) => c), 2)
+	a.insert(2, util.fill(util.create(10,2), (v,i,c) => c))
 
 	t.equal(a.length, 20)
 	t.deepEqual(a.getChannelData(0), Array(2).fill(2).concat(Array(10).fill(0)).concat(Array(8).fill(2)))
 
-	a.insert(util.fill(util.create(10, 2), (v,i,c) => 1-c), -5)
+	a.insert(-5, util.fill(util.create(10, 2), (v,i,c) => 1-c))
 
 	t.equal(a.length, 30)
 	t.deepEqual(a.getChannelData(1), Array(2).fill(2).concat(Array(10).fill(1)).concat(Array(3).fill(2)).concat(Array(10).fill(0)).concat(Array(5).fill(2)))
@@ -682,4 +682,3 @@ t('destroy no pipe', function (t) {
   t.equal(bl.length, 0)
 })
 
-t('reverse')

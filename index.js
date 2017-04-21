@@ -305,25 +305,18 @@ AudioBufferList.prototype.insert = function (offset, source) {
 
   offset = nidx(offset, this.length)
 
-  var offsets = this.offset(offset)
-  var leftBuf = offsets[1] ? util.subbuffer(this.buffers[offsets[0]], 0, offsets[1]) : null
-  var rightBuf = offsets[1] !== this.buffers[offsets[0]].length ? util.subbuffer(this.buffers[offsets[0]], offsets[1]) : null
+  this.split(offset)
+
+  var offset = this.offset(offset)
 
   //convert any type of source to audio buffer list
   source = new AudioBufferList(source)
-
-  //form new list
-  let bufs = this.buffers.slice(0, offsets[0])
-  if (leftBuf) bufs.push(leftBuf)
-  bufs = bufs.concat(source.buffers)
-  if (rightBuf) bufs.push(rightBuf)
-  bufs = bufs.concat(this.buffers.slice(offsets[0] + 1))
-
-  this.buffers = bufs
+  this.buffers.splice.apply(this.buffers, [offset[0], 0].concat(source.buffers))
 
   //update params
   this.length += source.length
   this.duration += source.duration
+  this.numberOfChannels = Math.max(source.numberOfChannels, this.numberOfChannels)
 
   return this
 }

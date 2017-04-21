@@ -26,7 +26,7 @@ Creates new audio buffer list instance, `new` is not strictly required.
 
 `source` can be _AudioBuffer_, _AudioBuffer_ array, _AudioBufferList_ or _AudioBufferList_ array.
 
-`options` may provide `channels`, `context` for web audio API context and `sampleRate`.
+`options` may provide `numberOfChannels`, `context` for web audio API context and `sampleRate`.
 
 ### `list.buffers`
 
