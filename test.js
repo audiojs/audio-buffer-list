@@ -142,7 +142,11 @@ t('each', t => {
 })
 
 t('Reverse', t => {
+  let list = AudioBufferList([AudioBuffer(1, [0,1,2]), AudioBuffer(1, [3,4,5])])
 
+  list.reverse(1,5)
+
+  t.deepEqual(list.getChannelData(0), [0,4,3,2,1,5])
 
   t.end()
 })
@@ -206,24 +210,61 @@ t('copyFromChannel', function (t) {
 	t.end()
 })
 
+t('split/join', t => {
+  let a = AudioBufferList(10)
+
+  t.equal(a.length, 10)
+  t.equal(a.buffers.length, 1)
+
+  a.split(4)
+
+  t.equal(a.buffers.length, 2)
+
+  a.split(4)
+
+  t.equal(a.buffers.length, 2)
+
+  a.split(5)
+
+  t.equal(a.buffers.length, 3)
+
+  a.split(10)
+
+  t.equal(a.buffers.length, 3)
+
+  a.split(9,8)
+
+  t.equal(a.buffers.length, 5)
+
+  a.split([7,6])
+
+  t.equal(a.buffers.length, 7)
+
+  t.end()
+})
 
 t('delete', t => {
-	var a = new AudioBufferList([util.fill(util.create(20, 2), (v, idx, channel) => channel), util.fill(util.create(20, 2), (v, idx, channel) => 1 -channel)]);
+  // var a = new AudioBufferList([util.fill(util.create(20, 2), (v, idx, channel) => channel), util.fill(util.create(20, 2), (v, idx, channel) => 1 -channel)]);
 
-	a.delete(10)
-	t.equal(a.length, 30)
-	t.deepEqual(a.getChannelData(0), Array(10).fill(0).concat(Array(20).fill(1)))
-	t.deepEqual(a.getChannelData(1), Array(10).fill(1).concat(Array(20).fill(0)))
+  // a.delete(10)
+  // t.equal(a.length, 30)
+  // t.deepEqual(a.getChannelData(0), Array(10).fill(0).concat(Array(20).fill(1)))
+  // t.deepEqual(a.getChannelData(1), Array(10).fill(1).concat(Array(20).fill(0)))
 
-	a.delete(10, 8)
-	t.equal(a.length, 20)
-	t.deepEqual(a.getChannelData(0), Array(8).fill(0).concat(Array(12).fill(1)))
-	t.deepEqual(a.getChannelData(1), Array(8).fill(1).concat(Array(12).fill(0)))
+  // a.delete(10, 8)
+  // t.equal(a.length, 20)
+  // t.deepEqual(a.getChannelData(0), Array(8).fill(0).concat(Array(12).fill(1)))
+  // t.deepEqual(a.getChannelData(1), Array(8).fill(1).concat(Array(12).fill(0)))
 
-	a.delete(-12)
-	t.equal(a.length, 8)
-	t.deepEqual(a.getChannelData(0), Array(8).fill(0))
-	t.deepEqual(a.getChannelData(1), Array(8).fill(1))
+  // a.delete(-12)
+  // t.equal(a.length, 8)
+  // t.deepEqual(a.getChannelData(0), Array(8).fill(0))
+  // t.deepEqual(a.getChannelData(1), Array(8).fill(1))
+
+  var b = AudioBufferList([AudioBuffer(1, [0,1,2]), AudioBuffer(1, [3,4,5])])
+
+  b.delete(1, 4)
+  t.equal(b.length, 2)
 
 	t.end()
 })
@@ -617,7 +658,7 @@ t('shallow slice does not make a copy', function (t) {
   t.deepEqual(bl.getChannelData(0), [0,0,0,0,0,0,0,0])
 })
 
-t('duplicate', function (t) {
+t('clone', function (t) {
   t.plan(2)
 
   var bl = new AudioBufferList(new AudioBuffer(1, [0,1,2,3,4,5,6,7,8,9]))
@@ -636,3 +677,5 @@ t('destroy no pipe', function (t) {
   t.equal(bl.buffers.length, 0)
   t.equal(bl.length, 0)
 })
+
+t('reverse')

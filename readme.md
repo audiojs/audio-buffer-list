@@ -124,6 +124,14 @@ Put data from the channel to destination _FloatArray_. Optional `startInChannel`
 
 Put data from the source _FloatArray_ into channel, optionally starting at `startInChannel` offset.
 
+### `list.split(a, b, c, ...)`
+
+Split list at the indicated indexes, that just increases number of inner buffers and that's it.
+
+### `list.join(start=0, end=-0)`
+
+Joins fragments for the indicated range together.
+
 ### `list.destroy()`
 
 Clean up list.

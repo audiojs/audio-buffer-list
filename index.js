@@ -337,12 +337,18 @@ AudioBufferList.prototype.delete = function (count, offset) {
 
   offset = nidx(offset, this.length)
 
+  this.split()
+  let sublist = this.slice(count, count + offset)
+
   var offsetsLeft = this.offset(offset)
+
+
+  /*
   var offsetsRight = this.offset(offset + count)
 
   //same segment slice
-  var leftBuf = offsetsLeft[1] ? util.subbuffer(this.buffers[offsetsLeft[0]], 0, offsetsLeft[1]) : null;
   var rightBuf = this.buffers[offsetsRight[0]].length !== offsetsRight[1] ? util.subbuffer(this.buffers[offsetsRight[0]], offsetsRight[1]) : null;
+  var leftBuf = offsetsLeft[1] ? util.subbuffer(this.buffers[offsetsLeft[0]], 0, offsetsLeft[1]) : null;
 
   //delete buffers
   let deleted = this.buffers.splice(offsetsLeft[0], offsetsRight[0] - offsetsLeft[0] + 1)
@@ -350,6 +356,7 @@ AudioBufferList.prototype.delete = function (count, offset) {
   //insert buffers
   if (rightBuf) this.buffers.splice(offsetsLeft[0], 0, rightBuf)
   if (leftBuf) this.buffers.splice(offsetsLeft[0], 0, leftBuf)
+  */
 
   this.length -= count
   this.duration = this.length / this.sampleRate
@@ -357,16 +364,17 @@ AudioBufferList.prototype.delete = function (count, offset) {
   return new AudioBufferList(deleted)
 }
 
-AudioBufferList.prototype.consume = function consume (bytes) {
+//remove N sampled from the beginning
+AudioBufferList.prototype.consume = function consume (size) {
   while (this.buffers.length) {
-    if (bytes >= this.buffers[0].length) {
-      bytes -= this.buffers[0].length
+    if (size >= this.buffers[0].length) {
+      size -= this.buffers[0].length
       this.length -= this.buffers[0].length
       this.buffers.shift()
     } else {
       //util.subbuffer would remain buffer in memory though it is faster
-      this.buffers[0] = util.subbuffer(this.buffers[0], bytes)
-      this.length -= bytes
+      this.buffers[0] = util.subbuffer(this.buffers[0], size)
+      this.length -= size
       break
     }
   }
@@ -447,4 +455,48 @@ AudioBufferList.prototype.each = function each (fn, from, to, reversed) {
   return this;
 }
 
+//reverse subpart
+AudioBufferList.prototype.reverse = function reverse (from, to) {
+  if (from == null) from = 0
+  if (to == null) to = this.length
 
+  from = nidx(from, this.length)
+  to = nidx(to, this.length)
+
+  let sublist = this.slice(from, to)
+  .each((buf) => {
+    util.reverse(buf)
+  })
+  sublist.buffers.reverse()
+
+  this.delete(from, to-from)
+
+  this.insert(from, sublist)
+
+  return this
+}
+
+//split at the indicated indexes
+AudioBufferList.prototype.split = function split () {
+  let args = arguments;
+
+  for (let i = 0; i < args.length; i++ ) {
+    let arg = args[i]
+    if (Array.isArray(arg)) {
+      this.split.apply(this, arg)
+    }
+    else if (typeof arg === 'number') {
+      let offset = this.offset(arg)
+      let buf = this.buffers[offset[0]]
+
+      if (offset[1] > 0 && offset[1] < buf.length) {
+        let left = util.subbuffer(buf, 0, offset[1])
+        let right = util.subbuffer(buf, offset[1])
+
+        this.buffers.splice(offset[0], 1, left, right)
+      }
+    }
+  }
+
+  return this
+}
