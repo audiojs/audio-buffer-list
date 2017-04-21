@@ -60,13 +60,17 @@ Insert new AudioBuffer, AudioBufferList or array of them to the end.
 
 Put new AudioBuffer, AudioBufferList or array of them at the offset.
 
+### `list.remove(offset=0, count)`
+
+Remove number of samples from the list starting at the `offset`. `count` can possibly be negative, then items are removed on the left side from the offset. `offset` can also be negative, meaning to remove from the end. Retuns removed sublist instance.
+
 ### `list.delete(offset=0, count)`
 
-Delete number of samples starting at the `offset`. `count` can possibly be negative, then items are deleted on the left side from the offset. `offset` can also be negative, meaning to start from the end. Retuns deleted _AudioBufferList_.
+Same as `list.remove`, but returns current list with deleted part being lost. That allows for different type of chainability.
 
 ### `list.consume(count)`
 
-Delete data from the beginning.
+Delete data from the beginning. Returns current list.
 
 ### `list.slice(start=0, end=-0)`
 
@@ -98,15 +102,15 @@ list = list.map((buf, idx, offset) => {
 
 ### `list.each((buffer, index, offset) => {}, from=0, to=-0, {reversed}?)`
 
-Iterate over buffers from the indicated range. Buffers can be modified in-place during the iterating. Return `false` to break loop. Pass `{reversed: true}` as the last argument to iterate in reverse order.
+Iterate over buffers from the indicated range. Buffers can be modified in-place during the iterating. Return `false` to break the loop. Pass `{reversed: true}` as the last argument to iterate in reverse order.
 
 ### `list.reverse(start=0, end=-0)`
 
-Reverse part of the list.
+Reverse indicated part of the list. Modifies list in place, returns self.
 
 ### `list.repeat(count)`
 
-Repeats contents of the list specified number of times. Modifies list in-place.
+Repeats contents of the list specified number of times. Modifies list in-place, returns self.
 
 ### `list.getChannelData(channel, from=0, to=-0)`
 
@@ -126,11 +130,11 @@ Put data from the source _FloatArray_ into channel, optionally starting at `star
 
 ### `list.split(a, b, c, ...)`
 
-Split list at the indicated indexes, that just increases number of inner buffers and that's it.
+Split list at the indicated indexes. That increases number of inner buffers and that's it.
 
 ### `list.join(start=0, end=-0)`
 
-Joins fragments for the indicated range together.
+Joins buffers from the indicated range.
 
 ### `list.destroy()`
 

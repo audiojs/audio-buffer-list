@@ -322,7 +322,7 @@ AudioBufferList.prototype.insert = function (offset, source) {
 }
 
 //delete N samples from any position
-AudioBufferList.prototype.delete = function (offset, count) {
+AudioBufferList.prototype.remove = function (offset, count) {
   if (count == null) {
     count = offset
     offset = 0
@@ -353,6 +353,12 @@ AudioBufferList.prototype.delete = function (offset, count) {
   this.duration = this.length / this.sampleRate
 
   return deleted
+}
+
+//delete samples from the list, return self
+AudioBufferList.prototype.delete = function () {
+  this.remove.apply(this, arguments)
+  return this
 }
 
 //remove N sampled from the beginning
@@ -460,7 +466,7 @@ AudioBufferList.prototype.reverse = function reverse (from, to) {
   })
   sublist.buffers.reverse()
 
-  this.delete(from, to-from)
+  this.remove(from, to-from)
 
   this.insert(from, sublist)
 
