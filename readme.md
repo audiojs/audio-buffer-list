@@ -46,7 +46,7 @@ Detected from the buffer with max number of channels in the list. Can be set by 
 
 ### `list.sampleRate`
 
-Just for convenience with _AudioBuffer_ interface
+Just for convenience with _AudioBuffer_ interface.
 
 ### `list.offset(sample)`
 
@@ -62,15 +62,19 @@ Put new AudioBuffer, AudioBufferList or array of them at the offset.
 
 ### `list.delete(count, offset=0)`
 
-Delete number of samples starting at the offset. `count` can possibly be negative, then items are deleted on the left side from the offset. `offset` can also be negative, meaning to start from the end.
+Delete number of samples starting at the `offset`. `count` can possibly be negative, then items are deleted on the left side from the offset. `offset` can also be negative, meaning to start from the end. Retuns deleted _AudioBufferList_.
 
-### `list.consume(length)`
+### `list.consume(count)`
 
 Delete data from the beginning.
 
 ### `list.slice(start=0, end=-0)`
 
-Return sublist of the initial list. The data is not copied but returned as subarrays.
+Return sublist of the initial list. The data is not copied but returned as subarrays. `list.slice()` just creates a duplicate that way.
+
+### `list.clone(start=0, end=-0)`
+
+Return copy of the list, consisting of cloned buffers.
 
 ### `list.map((buffer, index, offset) => buffer|bool?, from=0, to=-0)`
 
@@ -108,25 +112,17 @@ Repeats contents of the list specified number of times. Modifies list in-place.
 
 Return _FloatArray_ with merged data for the channel.
 
-### `list.copy(dest?, destStart?, srcStart?, srcEnd?)`
+### `list.copy(dest?, start=0, end=-0)`
 
-Put data into destination _AudioBuffer_.
+Put data into destination _AudioBuffer_ or create one.
 
-### `list.copyFromChannel(destination, channel, startInChannel=0)`
+### `list.copyFromChannel(arr, channel, startInChannel=0)`
 
 Put data from the channel to destination _FloatArray_. Optional `startInChannel` defines offset in the channel to start from.
 
-### `list.copyToChannel(source, channel, startInChannel=0)`
+### `list.copyToChannel(arr, channel, startInChannel=0)`
 
-Put data from the `source` _FloatArray_ into channel, optionally starting at `startInChannel` offset.
-
-### `list.duplicate()`
-
-Create new AudioBufferList consisting of the same AudioBuffers as the initial list.
-
-### `list.clone()`
-
-Return copy of the list, consisting of cloned buffers.
+Put data from the source _FloatArray_ into channel, optionally starting at `startInChannel` offset.
 
 ### `list.destroy()`
 

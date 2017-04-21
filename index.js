@@ -133,7 +133,6 @@ AudioBufferList.prototype.append = function (buf) {
 }
 
 
-AudioBufferList.prototype._offset =
 AudioBufferList.prototype.offset = function _offset (offset) {
   var tot = 0, i = 0, _t
   if (offset === 0) return [ 0, 0 ]
@@ -161,17 +160,6 @@ AudioBufferList.prototype._appendBuffer = function (buf) {
 
   return this
 }
-
-//return single audiobuffer with data
-AudioBufferList.prototype.get = function get (start, end) {
-  if (start == null) start = 0
-  if (end == null) end = this.length
-  start = nidx(start, this.length)
-  end = nidx(end, this.length)
-
-  return this.copy(null, 0, start, end)
-}
-
 
 //copy data to destination audio buffer
 AudioBufferList.prototype.copy = function copy (dst, dstStart, srcStart, srcEnd) {
@@ -240,9 +228,7 @@ AudioBufferList.prototype.copy = function copy (dst, dstStart, srcStart, srcEnd)
 }
 
 //do superficial handle
-AudioBufferList.prototype.slice =
-AudioBufferList.prototype.shallowSlice =
-function slice (start, end) {
+AudioBufferList.prototype.slice = function slice (start, end) {
   start = start || 0
   end = end == null ? this.length : end
 
@@ -271,39 +257,12 @@ function slice (start, end) {
   return new AudioBufferList(buffers)
 }
 
-AudioBufferList.prototype.consume = function consume (bytes) {
-  while (this.buffers.length) {
-    if (bytes >= this.buffers[0].length) {
-      bytes -= this.buffers[0].length
-      this.length -= this.buffers[0].length
-      this.buffers.shift()
-    } else {
-      //util.subbuffer would remain buffer in memory though it is faster
-      this.buffers[0] = util.subbuffer(this.buffers[0], bytes)
-      this.length -= bytes
-      break
-    }
-  }
-  this.duration = this.length / this.sampleRate
-  return this
-}
-
 //clone with preserving data
-AudioBufferList.prototype.duplicate = function duplicate () {
-  var i = 0, copy = new AudioBufferList()
+AudioBufferList.prototype.clone = function clone (start, end) {
+  var i = 0, copy = new AudioBufferList(), sublist = this.slice(start, end)
 
-  for (; i < this.buffers.length; i++)
-    copy.append(this.buffers[i])
-
-  return copy
-}
-
-//clone with copying the data
-AudioBufferList.prototype.clone = function clone () {
-  var i = 0, copy = new AudioBufferList()
-
-  for (; i < this.buffers.length; i++)
-    copy.append(utils.clone(this.buffers[i]))
+  for (; i < sublist.buffers.length; i++)
+    copy.append(util.clone(sublist.buffers[i]))
 
   return copy
 }
@@ -395,8 +354,26 @@ AudioBufferList.prototype.delete = function (count, offset) {
   this.length -= count
   this.duration = this.length / this.sampleRate
 
-  return deleted
+  return new AudioBufferList(deleted)
 }
+
+AudioBufferList.prototype.consume = function consume (bytes) {
+  while (this.buffers.length) {
+    if (bytes >= this.buffers[0].length) {
+      bytes -= this.buffers[0].length
+      this.length -= this.buffers[0].length
+      this.buffers.shift()
+    } else {
+      //util.subbuffer would remain buffer in memory though it is faster
+      this.buffers[0] = util.subbuffer(this.buffers[0], bytes)
+      this.length -= bytes
+      break
+    }
+  }
+  this.duration = this.length / this.sampleRate
+  return this
+}
+
 
 //return new list via applying fn to each buffer from the indicated range
 AudioBufferList.prototype.map = function map (fn, from, to) {

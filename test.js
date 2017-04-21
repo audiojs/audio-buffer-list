@@ -576,14 +576,14 @@ t('copy an interval between two buffers', function (t) {
 t('shallow slice across buffer boundaries', function (t) {
   var bl = new AudioBufferList([AudioBuffer(1, [0,0,0,0,0]), AudioBuffer(1, [1,1,1,1,1,1]), AudioBuffer(1, [2,2,2,2,2])])
 
-  t.deepEqual(bl.shallowSlice(3, 13).getChannelData(0), [0,0,1,1,1,1,1,1,2,2])
+  t.deepEqual(bl.slice(3, 13).getChannelData(0), [0,0,1,1,1,1,1,1,2,2])
   t.end()
 })
 
 t('shallow slice within single buffer', function (t) {
   var bl = new AudioBufferList(AudioBuffer(1, [0,1,2,3,4,5,6,7,8]))
 
-  t.deepEqual(bl.shallowSlice(3, 6).getChannelData(0), [3,4,5])
+  t.deepEqual(bl.slice(3, 6).getChannelData(0), [3,4,5])
   t.end()
 })
 
@@ -591,25 +591,25 @@ t('shallow slice single buffer', function (t) {
   t.plan(3)
   var bl = new AudioBufferList([AudioBuffer(1, [0,0,0,0,0]), AudioBuffer(1, [1,1,1,1,1,1]), AudioBuffer(1, [2,2,2,2,2])])
 
-  t.deepEqual(bl.shallowSlice(0, 5).getChannelData(0), AudioBuffer(1, [0,0,0,0,0]).getChannelData(0))
-  t.deepEqual(bl.shallowSlice(5, 11).getChannelData(0), AudioBuffer(1, [1,1,1,1,1,1]).getChannelData(0))
-  t.deepEqual(bl.shallowSlice(11, 16).getChannelData(0), AudioBuffer(1, [2,2,2,2,2]).getChannelData(0))
+  t.deepEqual(bl.slice(0, 5).getChannelData(0), AudioBuffer(1, [0,0,0,0,0]).getChannelData(0))
+  t.deepEqual(bl.slice(5, 11).getChannelData(0), AudioBuffer(1, [1,1,1,1,1,1]).getChannelData(0))
+  t.deepEqual(bl.slice(11, 16).getChannelData(0), AudioBuffer(1, [2,2,2,2,2]).getChannelData(0))
 })
 
 t('shallow slice with negative or omitted indices', function (t) {
   t.plan(4)
   var bl = new AudioBufferList([AudioBuffer(1, [0,0,0,0,0]), AudioBuffer(1, [1,1,1,1,1,1]), AudioBuffer(1, [2,2,2,2,2])])
 
-  t.deepEqual(bl.shallowSlice().getChannelData(0), '0000011111122222'.split('').map(v => parseFloat(v)))
-  t.deepEqual(bl.shallowSlice(5).getChannelData(0), '11111122222'.split('').map(v => parseFloat(v)))
-  t.deepEqual(bl.shallowSlice(5, -3).getChannelData(0), '11111122'.split('').map(v => parseFloat(v)))
-  t.deepEqual(bl.shallowSlice(-8).getChannelData(0), '11122222'.split('').map(v => parseFloat(v)))
+  t.deepEqual(bl.slice().getChannelData(0), '0000011111122222'.split('').map(v => parseFloat(v)))
+  t.deepEqual(bl.slice(5).getChannelData(0), '11111122222'.split('').map(v => parseFloat(v)))
+  t.deepEqual(bl.slice(5, -3).getChannelData(0), '11111122'.split('').map(v => parseFloat(v)))
+  t.deepEqual(bl.slice(-8).getChannelData(0), '11122222'.split('').map(v => parseFloat(v)))
 })
 
 t('shallow slice does not make a copy', function (t) {
   t.plan(1)
   var buffers = [new AudioBuffer(1, AudioBuffer(1, [0,0,0,0,0])), new AudioBuffer(1, AudioBuffer(1, [1,1,1,1,1,1])), new AudioBuffer(1, AudioBuffer(1, [2,2,2,2,2]))]
-  var bl = (new AudioBufferList(buffers)).shallowSlice(5, -3)
+  var bl = (new AudioBufferList(buffers)).slice(5, -3)
 
   util.fill(buffers[1],0)
   util.fill(buffers[2],0)
@@ -621,7 +621,7 @@ t('duplicate', function (t) {
   t.plan(2)
 
   var bl = new AudioBufferList(new AudioBuffer(1, [0,1,2,3,4,5,6,7,8,9]))
-    , dup = bl.duplicate()
+    , dup = bl.clone()
 
   t.equal(bl.prototype, dup.prototype)
   t.deepEqual(bl.getChannelData(0), dup.getChannelData(0))
