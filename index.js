@@ -110,18 +110,17 @@ AudioBufferList.prototype.append = function (buf) {
 	//FIXME: we may want to do resampling/channel mapping here or something
 	var i = 0
 
-	if (isAudioBuffer(buf)) {
-		this._appendBuffer(buf)
-	}
-	else if (Array.isArray(buf)) {
-    for (; i < buf.length; i++) {
+  // unwrap argument into individual BufferLists
+  if (buf instanceof AudioBufferList) {
+    this.append(buf.buffers)
+  }
+  else if (isAudioBuffer(buf)) {
+    this._appendBuffer(buf)
+  }
+  else if (Array.isArray(buf)) {
+    for (var l = buf.length; i < l; i++) {
       this.append(buf[i])
     }
-  }
-  // unwrap argument into individual BufferLists
-  else if (buf instanceof AudioBufferList) {
-    for (; i < buf.buffers.length; i++)
-      this.append(buf.buffers[i])
   }
   //create AudioBuffer from arg
   else if (buf != null) {
