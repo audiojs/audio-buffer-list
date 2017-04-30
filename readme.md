@@ -20,7 +20,9 @@ abl.slice() // <AudioBuffer 0, .1, .2, .3, 0...>
 
 ## API
 
-* [new AudioBufferList(src, opts?)](https://img.shields.io/badge/stability-experimental-red.svg)
+### Table of Content
+
+* [new AudioBufferList(src, opts?)](#new-audiobufferlistsource-options)
 * [list.buffers](#listbuffers)
 * [list.length](#listlength)
 * [list.duration](#listduration)
