@@ -1,4 +1,4 @@
-# audio-buffer-list [![Build Status](https://travis-ci.org/audiojs/audio-buffer-list.svg?branch=master)](https://travis-ci.org/audiojs/audio-buffer-list) [![unstable](http://badges.github.io/stability-badges/dist/unstable.svg)](http://github.com/badges/stability-badges)
+# audio-buffer-list [![Build Status](https://travis-ci.org/audiojs/audio-buffer-list.svg?branch=master)](https://travis-ci.org/audiojs/audio-buffer-list) [![unstable](https://img.shields.io/badge/stability-unstable-green.svg)](http://github.com/badges/stability-badges) [![Greenkeeper badge](https://badges.greenkeeper.io/audiojs/audio-buffer-list.svg)](https://greenkeeper.io/)
 
 Extension of [BufferList](https://npmjs.org/package/bl) for [AudioBuffers](https://npmjs.org/package/audio-buffer). Handy and performant to deal with (possibly long) sequence of audio buffers − accumulate, read, stream, modify, delete etc.
 
@@ -19,6 +19,32 @@ abl.slice() // <AudioBuffer 0, .1, .2, .3, 0...>
 ```
 
 ## API
+
+* [new AudioBufferList(src, opts?)](https://img.shields.io/badge/stability-experimental-red.svg)
+* [list.buffers](#listbuffers)
+* [list.length](#listlength)
+* [list.duration](#listduration)
+* [list.numberOfChannels](#listnumberofchannels)
+* [list.sampleRate](#listsamplerate)
+* [list.offset(idx)](#listoffsetsample)
+* [list.append(buf)](#listappendbuffer)
+* [list.insert(idx?, buf)](#listinsertoffset0-buffer)
+* [list.remove(idx?, len)](#listremoveoffset0-count)
+* [list.delete(idx?, len)](#listdeleteoffset0-count)
+* [list.consume(len)](#listconsumecount)
+* [list.slice(from?, to?)](#listslicestart0-end-0)
+* [list.clone(from?, to?)](#listclonestart0-end-0)
+* [list.map(fn, from?, to?)](#listmapbuffer-index-offset--bufferbool-from0-to-0)
+* [list.each(fn, from?, to?, opt?)](#listeachbuffer-index-offset---from0-to-0-reversed)
+* [list.reverse(from?, to?)](#listreversestart0-end-0)
+* [list.repeat(times)](#listrepeatcount)
+* [list.getChannelData(ch, from?, to?)](#listgetchanneldatachannel-from0-to-0)
+* [list.copy(dst?, from?, to?)](#listcopydest-start0-end-0)
+* [list.copyFromChannel(dst, ch, offset?)](#listcopyfromchannelarr-channel-startinchannel0)
+* [list.copyToChannel(src, ch, offset?)](#listcopytochannelarr-channel-startinchannel0)
+* [list.split(a, b, c, ...)](#listsplita-b-c-)
+* [list.join(from?, to?)](#listjoinstart0-end-0)
+* [list.destroy()](#listdestroy)
 
 ### `new AudioBufferList(source, options?)`
 
