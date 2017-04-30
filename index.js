@@ -24,6 +24,11 @@ inherit(AudioBufferList, Emitter)
 function AudioBufferList(arg, options) {
   if (!(this instanceof AudioBufferList)) return new AudioBufferList(arg, options)
 
+  if (typeof options === 'number') {
+    options = {channels: options}
+  }
+  if (options && options.channels != null) options.numberOfChannels = options.channels
+
   extend(this, options)
 
   this.buffers = []
