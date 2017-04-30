@@ -700,3 +700,15 @@ t('slice', function (t) {
 
   t.end()
 })
+
+t('zero buffers', function (t) {
+  let a = AudioBufferList(0, 2)
+  t.equal(a.buffers.length, 0)
+
+  let b = AudioBufferList(10, 2)
+  let c = b.slice(0,0)
+  t.equal(c.length, 0)
+  t.equal(c.buffers.length, 0)
+
+  t.end()
+})

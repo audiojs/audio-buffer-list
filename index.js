@@ -35,7 +35,7 @@ function AudioBufferList(arg, options) {
 
 
 //AudioBuffer interface
-AudioBufferList.prototype.numberOfChannels = 0
+AudioBufferList.prototype.numberOfChannels = 2
 AudioBufferList.prototype.sampleRate = null
 
 //copy from channel into destination array
@@ -114,7 +114,7 @@ AudioBufferList.prototype.append = function (buf) {
   if (buf instanceof AudioBufferList) {
     this.append(buf.buffers)
   }
-  else if (isAudioBuffer(buf)) {
+  else if (isAudioBuffer(buf) && buf.length) {
     this._appendBuffer(buf)
   }
   else if (Array.isArray(buf)) {
@@ -122,8 +122,8 @@ AudioBufferList.prototype.append = function (buf) {
       this.append(buf[i])
     }
   }
-  //create AudioBuffer from arg
-  else if (buf != null) {
+  //create AudioBuffer from (possibly num) arg
+  else if (buf) {
 		buf = new AudioBuffer(this.numberOfChannels || 2, buf)
 		this._appendBuffer(buf)
 	}
