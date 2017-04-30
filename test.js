@@ -523,7 +523,6 @@ t('complete consumption', function (t) {
   t.end()
 })
 
-
 t('test readUInt16LE / readUInt16BE / readInt16LE / readInt16BE', function (t) {
   var buf1 = new AudioBuffer(1, 1)
     , buf2 = new AudioBuffer(1, 3)
@@ -686,3 +685,18 @@ t('destroy no pipe', function (t) {
   t.equal(bl.length, 0)
 })
 
+t('slice', function (t) {
+  var l = new AudioBufferList(10, 2)
+
+  t.equal(l.numberOfChannels, 2)
+
+  l.consume(10)
+
+  t.equal(l.numberOfChannels, 2)
+
+  let m = l.slice()
+
+  t.equal(m.numberOfChannels, 2)
+
+  t.end()
+})

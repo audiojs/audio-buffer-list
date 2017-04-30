@@ -235,7 +235,7 @@ AudioBufferList.prototype.slice = function slice (start, end) {
   end = nidx(end, this.length)
 
   if (start == end) {
-    return new AudioBufferList()
+    return new AudioBufferList(0, this.numberOfChannels)
   }
 
   var startOffset = this.offset(start)
@@ -253,12 +253,12 @@ AudioBufferList.prototype.slice = function slice (start, end) {
     buffers[0] = util.subbuffer(buffers[0], startOffset[1])
   }
 
-  return new AudioBufferList(buffers)
+  return new AudioBufferList(buffers, this.numberOfChannels)
 }
 
 //clone with preserving data
 AudioBufferList.prototype.clone = function clone (start, end) {
-  var i = 0, copy = new AudioBufferList(), sublist = this.slice(start, end)
+  var i = 0, copy = new AudioBufferList(0, this.numberOfChannels), sublist = this.slice(start, end)
 
   for (; i < sublist.buffers.length; i++)
     copy.append(util.clone(sublist.buffers[i]))
@@ -346,7 +346,7 @@ AudioBufferList.prototype.remove = function (offset, count) {
   }
 
   let deleted = this.buffers.splice(offsetLeft[0], offsetRight[0] - offsetLeft[0])
-  deleted = new AudioBufferList(deleted)
+  deleted = new AudioBufferList(deleted, this.numberOfChannels)
 
   this.length -= deleted.length
   this.duration = this.length / this.sampleRate
@@ -411,7 +411,7 @@ AudioBufferList.prototype.map = function map (fn, from, to) {
     return buf ? !!buf.length : false
   })
 
-  return new AudioBufferList(before.concat(middle).concat(after))
+  return new AudioBufferList(before.concat(middle).concat(after), this.numberOfChannels)
 }
 
 //apply fn to every buffer for the indicated range
