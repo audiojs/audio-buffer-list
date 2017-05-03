@@ -718,8 +718,15 @@ t('udpate number of channels', function (t) {
 
   t.equal(a.numberOfChannels, 3)
 
-  let b = AudioBufferList(0, 1)
+  let b = AudioBufferList(0, 2)
 
+  t.equal(b.numberOfChannels, 2)
+  t.equal(b.length, 0)
+  t.equal(b.buffers.length, 0)
+
+  b.append(AudioBuffer(1, 1))
+
+  t.equal(b.length, 1)
   t.equal(b.numberOfChannels, 1)
 
   t.end()

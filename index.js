@@ -150,17 +150,23 @@ AudioBufferList.prototype.offset = function _offset (offset) {
 
 
 AudioBufferList.prototype._appendBuffer = function (buf) {
-  // if (buf.sampleRate != this.sampleRate) throw Error('Required sample rate is ' + this.sampleRate + ', passed ' + buf.sampleRate)
-  this.buffers.push(buf)
-  this.length += buf.length
+  if (!buf) return this
 
-  // if (buf.numberOfChannels != this.numberOfChannels) throw Error('Required number of channels is ' + this.numberOfChannels + ', passed ' + buf.numberOfChannels)
   //update channels count
-  this.numberOfChannels = Math.max(this.numberOfChannels, buf.numberOfChannels)
+  if (!this.buffers.length) {
+    this.numberOfChannels = buf.numberOfChannels
+  }
+  else {
+    this.numberOfChannels = Math.max(this.numberOfChannels, buf.numberOfChannels)
+  }
   this.duration += buf.duration
 
   //init sampleRate
   if (!this.sampleRate) this.sampleRate = buf.sampleRate
+
+  //push buffer
+  this.buffers.push(buf)
+  this.length += buf.length
 
   return this
 }
