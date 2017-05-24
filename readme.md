@@ -41,10 +41,9 @@ abl.slice() // <AudioBuffer 0, .1, .2, .3, 0...>
 * [list.each(fn, from?, to?, opt?)](#listeachbuffer-index-offset---from0-to-0-reversed)
 * [list.reverse(from?, to?)](#listreversestart0-end-0)
 * [list.repeat(times)](#listrepeatcount)
-* [list.getChannelData(ch, from?, to?)](#listgetchanneldatachannel-from0-to-0)
 * [list.copy(dst?, from?, to?)](#listcopydest-start0-end-0)
-* [list.copyFromChannel(dst, ch, offset?)](#listcopyfromchannelarr-channel-startinchannel0)
-* [list.copyToChannel(src, ch, offset?)](#listcopytochannelarr-channel-startinchannel0)
+* [list.copyFromChannel(dst, ch, from?, to?)](#listcopyfromchannelarr-channel-startinchannel0)
+* [list.copyToChannel(src, ch, from?)](#listcopytochannelarr-channel-startinchannel0)
 * [list.split(a, b, c, ...)](#listsplita-b-c-)
 * [list.join(from?, to?)](#listjoinstart0-end-0)
 * [list.destroy()](#listdestroy)
@@ -141,19 +140,15 @@ Reverse indicated part of the list. Modifies list in place, returns self.
 
 Repeats contents of the list specified number of times. Modifies list in-place, returns self.
 
-### `list.getChannelData(channel, from=0, to=-0)`
-
-Return _FloatArray_ with merged data for the channel.
-
 ### `list.copy(dest?, start=0, end=-0)`
 
 Put data into destination _AudioBuffer_ or create one.
 
-### `list.copyFromChannel(arr, channel, startInChannel=0)`
+### `list.copyFromChannel(dest, channel, startInChannel=0, end=-0)`
 
 Put data from the channel to destination _FloatArray_. Optional `startInChannel` defines offset in the channel to start from.
 
-### `list.copyToChannel(arr, channel, startInChannel=0)`
+### `list.copyToChannel(src, channel, startInChannel=0, end=-0)`
 
 Put data from the source _FloatArray_ into channel, optionally starting at `startInChannel` offset.
 
