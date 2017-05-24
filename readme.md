@@ -24,11 +24,6 @@ abl.slice() // <AudioBuffer 0, .1, .2, .3, 0...>
 ### Table of Content
 
 * [new AudioBufferList(src, opts?)](#new-audiobufferlistsource-options)
-* [list.buffers](#listbuffers)
-* [list.length](#listlength)
-* [list.duration](#listduration)
-* [list.numberOfChannels](#listnumberofchannels)
-* [list.sampleRate](#listsamplerate)
 * [list.offset(idx)](#listoffsetsample)
 * [list.append(buf)](#listappendbuffer)
 * [list.insert(idx?, buf)](#listinsertoffset0-buffer)
@@ -56,25 +51,13 @@ Creates new audio buffer list instance, `new` is not strictly required.
 
 `options` may provide `numberOfChannels`, `context` for web audio API context and `sampleRate`.
 
-### `list.buffers`
+The created list instance contains the following properties:
 
-Sequence of audio buffers with actual data.
-
-### `list.length`
-
-Total length of list in samples, i.e. sum of inner buffer lengths.
-
-### `list.duration`
-
-Total duration of the audio list, i.e. sum of buffers durations.
-
-### `list.numberOfChannels`
-
-Detected from the buffer with max number of channels in the list. Can be set by options.
-
-### `list.sampleRate`
-
-Just for convenience with _AudioBuffer_ interface.
+* `list.buffers` − sequence of audio buffers with actual data.
+* `list.length` − total length of list in samples, i.e. sum of inner buffer lengths.
+* `list.duration` − total duration of the audio list, i.e. sum of buffers durations.
+* `list.numberOfChannels` − detected from the buffer with max number of channels in the list. Can be set by options.
+* `list.sampleRate` − just for convenience with _AudioBuffer_ interface.
 
 ### `list.offset(sample)`
 
