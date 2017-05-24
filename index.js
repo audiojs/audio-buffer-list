@@ -258,6 +258,7 @@ AudioBufferList.prototype.clone = function clone (start, end) {
 AudioBufferList.prototype.destroy = function destroy () {
   this.buffers.length = 0
   this.length = 0
+  this.buffers = null
 }
 
 

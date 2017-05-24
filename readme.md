@@ -90,21 +90,19 @@ Return copy of the list, consisting of cloned buffers.
 
 ### `list.map((buffer, index, offset) => buffer|bool?, from=0, to=-0)`
 
-Create new list by mapping every buffer. Optionally pass offsets `from` and `to` to map only buffers covering the subset, keeping the rest unchanged. If no buffer returned from the mapper function then the old buffer will be preserved. If `null` returned then the buffer will be discarded. `offset` tracks `buffer` offset in new list, `index` reflects buffer count.
+Create new list by mapping every buffer. Optionally pass offsets `from` and `to` to map only buffers covering the subset, keeping the rest unchanged. If no buffer returned from the mapper function then the old buffer will be preserved. If `null` returned then the buffer will be discarded. `offset` tracks absolute `buffer` offset in new list, `index` reflects buffer count.
 
 ```js
 list = list.map((buf, idx, offset) => {
-	for (let c = 0; c < channels; c++) {
-		let data = buf.getChannelData(channel)
+  for (let c = 0; c < channels; c++) {
+    let data = buf.getChannelData(c)
 
-		//start buffer from the subset may start earlier than the subset
-		//end buffer from the subset may end later than the subset
-		for (let i = Math.max(from - offset, 0),
-					l = Math.min(to - offset, buf.length);
-					i < l; i++) {
-			data[i] = process(data[i])
-		}
-	}
+    //start buffer from the subset may start earlier than the subset
+    //end buffer from the subset may end later than the subset
+    for (let i = Math.max(from - offset, 0), l = Math.min(to - offset, buf.length); i < l; i++) {
+      data[i] = process(data[i])
+    }
+  }
 }, from, to)
 ```
 
@@ -122,7 +120,7 @@ Repeats contents of the list specified number of times. Modifies list in-place, 
 
 ### `list.copy(dest?, start=0, end=-0)`
 
-Put data into destination _AudioBuffer_ or create one.
+Put data into destination _AudioBuffer_ or create one. It is like `slice`, but returns an _AudioBuffer_.
 
 ### `list.copyFromChannel(dest, channel, startInChannel=0, end=-0)`
 
@@ -134,13 +132,13 @@ Put data from the source _FloatArray_ into channel, optionally starting at `star
 
 ### `list.split(a, b, c, ...)`
 
-Split list at the indicated indexes. That increases number of inner buffers and that's it.
+Split list at the indicated indexes. That increases number of inner buffers.
 
 ### `list.join(start=0, end=-0)`
 
 Joins buffers from the indicated range.
 
-### `list.offset(sample)`
+### `list.offset(idx)`
 
 Return `[bufIdx, offset]` pair for any sample number. `bufIdx` is the number of buffer in the list, `offset` is sample offset inside of that buffer.
 
@@ -150,7 +148,7 @@ Clean up list.
 
 ## See also
 
-* [audio](https://github.com/audiojs/audio) — high-level class for audio
-* [audio-buffer](https://github.com/audiojs/audio-buffer) — audio buffer class for nodejs and browser
-* [audio-buffer-utils](https://github.com/audio-buffer-utils) — toolset for audio buffers
-* [buffer-list](https://npmjs.org/package/bl) — canonical BufferList implementation
+* [audio](https://github.com/audiojs/audio) — high-level class for audio manipulations.
+* [audio-buffer](https://github.com/audiojs/audio-buffer) — audio buffer class for nodejs and browser.
+* [audio-buffer-utils](https://github.com/audio-buffer-utils) — toolset for audio buffers.
+* [buffer-list](https://npmjs.org/package/bl) — canonical BufferList implementation.
