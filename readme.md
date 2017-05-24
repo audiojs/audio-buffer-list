@@ -9,10 +9,11 @@ Extension of [BufferList](https://npmjs.org/package/bl) for [AudioBuffers](https
 ```js
 const AudioBufferList = require('audio-buffer-list')
 const AudioBuffer = require('audio-buffer')
+const util = require('audio-buffer-utils')
 
-let abl = new AudioBufferList(new AudioBuffer(1, [0, .1, .2, .3]), new AudioBuffer(1, 100))
+let abl = new AudioBufferList(util.create([0, .1, .2, .3]), util.create(100))
 
-abl.append(new AudioBuffer(1, 100))
+abl.append(util.create(100))
 
 abl.length // 204
 abl.slice() // <AudioBuffer 0, .1, .2, .3, 0...>
