@@ -7,18 +7,14 @@
 'use strict'
 
 var isAudioBuffer = require('is-audio-buffer')
-var inherit = require('inherits')
 var util = require('audio-buffer-utils')
 var extend = require('object-assign')
 var nidx = require('negative-index')
 var isPlainObj = require('is-plain-obj')
-var Emitter = require('events')
 var AudioBuffer = require('audio-buffer')
 
 module.exports = AudioBufferList
 
-
-inherit(AudioBufferList, Emitter)
 
 
 function AudioBufferList(arg, options) {
