@@ -24,7 +24,6 @@ abl.slice() // <AudioBuffer 0, .1, .2, .3, 0...>
 ### Table of Content
 
 * [new AudioBufferList(src, opts?)](#new-audiobufferlistsource-options)
-* [list.offset(idx)](#listoffsetsample)
 * [list.append(buf)](#listappendbuffer)
 * [list.insert(idx?, buf)](#listinsertoffset0-buffer)
 * [list.remove(idx?, len)](#listremoveoffset0-count)
@@ -41,6 +40,7 @@ abl.slice() // <AudioBuffer 0, .1, .2, .3, 0...>
 * [list.copyToChannel(src, ch, from?)](#listcopytochannelarr-channel-startinchannel0)
 * [list.split(a, b, c, ...)](#listsplita-b-c-)
 * [list.join(from?, to?)](#listjoinstart0-end-0)
+* [list.offset(idx)](#listoffsetsample)
 * [list.destroy()](#listdestroy)
 
 ### `new AudioBufferList(source, options?)`
@@ -59,9 +59,6 @@ The created list instance contains the following properties:
 * `list.numberOfChannels` − detected from the buffer with max number of channels in the list. Can be set by options.
 * `list.sampleRate` − just for convenience with _AudioBuffer_ interface.
 
-### `list.offset(sample)`
-
-Return `[bufIdx, offset]` pair for any sample number. `bufIdx` is the number of buffer in the list, `offset` is sample offset inside of that buffer.
 
 ### `list.append(buffer)`
 
@@ -142,6 +139,10 @@ Split list at the indicated indexes. That increases number of inner buffers and 
 ### `list.join(start=0, end=-0)`
 
 Joins buffers from the indicated range.
+
+### `list.offset(sample)`
+
+Return `[bufIdx, offset]` pair for any sample number. `bufIdx` is the number of buffer in the list, `offset` is sample offset inside of that buffer.
 
 ### `list.destroy()`
 
