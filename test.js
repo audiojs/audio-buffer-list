@@ -688,7 +688,7 @@ t('destroy no pipe', function (t) {
   var bl = new AudioBufferList(util.create([0,1,0,1,0,1,0,1]))
   bl.destroy()
 
-  t.equal(bl.buffers.length, 0)
+  t.equal(bl.buffers, null)
   t.equal(bl.length, 0)
 })
 
