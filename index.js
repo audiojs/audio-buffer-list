@@ -1,5 +1,5 @@
 /**
- * AudioBuffer class
+ * AudioBufferList class
  *
  * @module audio-buffer/buffer
  *
@@ -9,11 +9,11 @@
 var isAudioBuffer = require('is-audio-buffer')
 var inherit = require('inherits')
 var util = require('audio-buffer-utils')
-var AudioBuffer = require('audio-buffer')
 var extend = require('object-assign')
 var nidx = require('negative-index')
 var isPlainObj = require('is-plain-obj')
 var Emitter = require('events')
+var AudioBuffer = require('audio-buffer')
 
 module.exports = AudioBufferList
 
@@ -40,7 +40,7 @@ function AudioBufferList(arg, options) {
 
 
 //AudioBuffer interface
-AudioBufferList.prototype.numberOfChannels = 2
+AudioBufferList.prototype.numberOfChannels = 1
 AudioBufferList.prototype.sampleRate = null
 
 //copy from channel into destination array
@@ -129,7 +129,7 @@ AudioBufferList.prototype.append = function (buf) {
   }
   //create AudioBuffer from (possibly num) arg
   else if (buf) {
-		buf = new AudioBuffer(this.numberOfChannels || 2, buf)
+		buf = util.create(buf, this.numberOfChannels)
 		this._appendBuffer(buf)
 	}
 
@@ -178,9 +178,9 @@ AudioBufferList.prototype.copy = function copy (dst, dstStart, srcStart, srcEnd)
 	if (typeof srcEnd != 'number' || srcEnd > this.length)
 		srcEnd = this.length
 	if (srcStart >= this.length)
-		return dst || new AudioBuffer(this.numberOfChannels, 0)
+		return dst || new AudioBuffer(null, {length: 0})
 	if (srcEnd <= 0)
-		return dst || new AudioBuffer(this.numberOfChannels, 0)
+		return dst || new AudioBuffer(null, {length: 0})
 
   var copy   = !!dst
     , off    = this.offset(srcStart)
@@ -215,7 +215,7 @@ AudioBufferList.prototype.copy = function copy (dst, dstStart, srcStart, srcEnd)
   }
 
   if (!copy) // a slice, we need something to copy in to
-    dst = new AudioBuffer(this.numberOfChannels, len)
+    dst = util.create(len, this.numberOfChannels)
 
   for (i = off[0]; i < this.buffers.length; i++) {
     l = this.buffers[i].length - start
@@ -317,7 +317,7 @@ AudioBufferList.prototype.insert = function (offset, source) {
 
   this.split(offset)
 
-  var offset = this.offset(offset)
+  offset = this.offset(offset)
 
   //convert any type of source to audio buffer list
   source = new AudioBufferList(source)
@@ -437,8 +437,6 @@ AudioBufferList.prototype.each = function each (fn, from, to, reversed) {
 
   let fromOffset = this.offset(from)
   let toOffset = this.offset(to)
-
-  let middle = this.buffers.slice(fromOffset[0], toOffset[0] + 1)
 
   if (options.reversed) {
     let offset = to - toOffset[1]
