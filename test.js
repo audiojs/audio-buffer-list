@@ -599,7 +599,7 @@ t('copy starting from a precise location', function (t) {
     , b    = AudioBufferList(buf)
 
   b.copy(buf2, 0, 5)
-  t.deepEqual(getChannelData(b.slice(5), 0), buf2.getChannelData(0), 'same buffer')
+  t.deepEqual(getChannelData(b.slice(0, 5), 0), buf2.getChannelData(0), 'same buffer')
   t.end()
 })
 
@@ -720,7 +720,7 @@ t('zero buffers', function (t) {
   t.end()
 })
 
-t('udpate number of channels', function (t) {
+t('update number of channels', function (t) {
   let a = AudioBufferList(3, 3)
 
   t.equal(a.numberOfChannels, 3)
@@ -735,6 +735,24 @@ t('udpate number of channels', function (t) {
 
   t.equal(b.length, 1)
   t.equal(b.numberOfChannels, 1)
+
+  t.end()
+})
+
+t('remove 0-len should return null', function (t) {
+  let a = AudioBufferList(10)
+  t.ok(a.remove(10))
+  t.notOk(a.remove(10))
+  t.end()
+})
+
+t('copy(from, to)', function (t) {
+  let a = new AudioBufferList([0, 1, 2, 3, 4, 5])
+
+  t.equal(a.length, 6)
+
+  let b = a.copy(1,4)
+  t.deepEqual(b.getChannelData(0), [1,2,3])
 
   t.end()
 })

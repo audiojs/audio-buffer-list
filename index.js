@@ -99,7 +99,7 @@ AudioBufferList.prototype.append = function (buf) {
   else if (isAudioBuffer(buf) && buf.length) {
     this._appendBuffer(buf)
   }
-  else if (Array.isArray(buf)) {
+  else if (Array.isArray(buf) && typeof buf[0] !== 'number') {
     for (var l = buf.length; i < l; i++) {
       this.append(buf[i])
     }
@@ -150,6 +150,18 @@ AudioBufferList.prototype._appendBuffer = function (buf) {
 
 //copy data to destination audio buffer
 AudioBufferList.prototype.copy = function copy (dst, dstStart, srcStart, srcEnd) {
+  if (typeof dst === 'number') {
+    srcEnd = srcStart;
+    srcStart = dstStart
+    dstStart = dst;
+    dst = null;
+  }
+  if (srcEnd == null && srcStart != null) {
+    srcEnd = srcStart
+    srcStart = dstStart
+    dstStart = 0
+  }
+
 	if (typeof srcStart != 'number' || srcStart < 0)
 		srcStart = 0
 	if (typeof srcEnd != 'number' || srcEnd > this.length)
@@ -311,6 +323,8 @@ AudioBufferList.prototype.insert = function (offset, source) {
 
 //delete N samples from any position
 AudioBufferList.prototype.remove = function (offset, count) {
+  if (!this.length) return null
+
   if (count == null) {
     count = offset
     offset = 0
