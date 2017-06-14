@@ -20,6 +20,10 @@ module.exports = AudioBufferList
 function AudioBufferList(arg, options) {
   if (!(this instanceof AudioBufferList)) return new AudioBufferList(arg, options)
 
+  if (isPlainObj(arg)) {
+    options = arg
+    arg = null
+  }
   if (typeof options === 'number') {
     options = {channels: options}
   }
@@ -38,6 +42,11 @@ function AudioBufferList(arg, options) {
 //AudioBuffer interface
 AudioBufferList.prototype.numberOfChannels = 1
 AudioBufferList.prototype.sampleRate = null
+
+//test instance
+AudioBufferList.isInstance = function (a) {
+  return a instanceof AudioBufferList
+}
 
 //copy from channel into destination array
 AudioBufferList.prototype.copyFromChannel = function (destination, channel, from, to) {
@@ -89,8 +98,8 @@ AudioBufferList.prototype.copyToChannel = function (source, channel, from) {
 
 //patch BufferList methods
 AudioBufferList.prototype.append = function (buf) {
-	//FIXME: we may want to do resampling/channel mapping here or something
-	var i = 0
+  //FIXME: we may want to do resampling/channel mapping here or something
+  var i = 0
 
   // unwrap argument into individual BufferLists
   if (buf instanceof AudioBufferList) {
@@ -106,11 +115,11 @@ AudioBufferList.prototype.append = function (buf) {
   }
   //create AudioBuffer from (possibly num) arg
   else if (buf) {
-		buf = util.create(buf, this.numberOfChannels)
-		this._appendBuffer(buf)
-	}
+    buf = util.create(buf, this.numberOfChannels)
+    this._appendBuffer(buf)
+  }
 
-	return this
+  return this
 }
 
 
@@ -162,14 +171,14 @@ AudioBufferList.prototype.copy = function copy (dst, dstStart, srcStart, srcEnd)
     dstStart = 0
   }
 
-	if (typeof srcStart != 'number' || srcStart < 0)
-		srcStart = 0
-	if (typeof srcEnd != 'number' || srcEnd > this.length)
-		srcEnd = this.length
-	if (srcStart >= this.length)
-		return dst || new AudioBuffer(null, {length: 0})
-	if (srcEnd <= 0)
-		return dst || new AudioBuffer(null, {length: 0})
+  if (typeof srcStart != 'number' || srcStart < 0)
+    srcStart = 0
+  if (typeof srcEnd != 'number' || srcEnd > this.length)
+    srcEnd = this.length
+  if (srcStart >= this.length)
+    return dst || new AudioBuffer(null, {length: 0})
+  if (srcEnd <= 0)
+    return dst || new AudioBuffer(null, {length: 0})
 
   var copy   = !!dst
     , off    = this.offset(srcStart)

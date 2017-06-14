@@ -23,7 +23,7 @@ abl.slice() // <AudioBuffer 0, .1, .2, .3, 0...>
 
 ### Table of Content
 
-* [new AudioBufferList(src, opts?)](#new-audiobufferlistsource-options)
+* [new AudioBufferList(src?, opts?)](#new-audiobufferlistsource-options)
 * [list.append(buf)](#listappendbuffer)
 * [list.insert(idx?, buf)](#listinsertoffset0-buffer)
 * [list.remove(idx?, len)](#listremoveoffset0-count)
@@ -42,6 +42,7 @@ abl.slice() // <AudioBuffer 0, .1, .2, .3, 0...>
 * [list.join(from?, to?)](#listjoinstart0-end-0)
 * [list.offset(idx)](#listoffsetsample)
 * [list.destroy()](#listdestroy)
+* [AudioBufferList.isInatance(arg)](#audiobufferlistisinstancearg)
 
 ### `new AudioBufferList(source, options?)`
 
@@ -145,6 +146,10 @@ Return `[bufIdx, offset]` pair for any sample number. `bufIdx` is the number of 
 ### `list.destroy()`
 
 Clean up list.
+
+### `AudioBufferList.isInstance(arg)`
+
+Check if passed argument is instance of _AudioBufferList_.
 
 ## See also
 

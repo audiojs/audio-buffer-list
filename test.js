@@ -16,6 +16,14 @@ function getChannelData(list, channel, from, to) {
   return arr
 }
 
+t('create with options argument', t => {
+  var a = new AudioBufferList({channels: 3})
+
+  t.equal(a.length, 0)
+  t.equal(a.channels, 3)
+
+  t.end()
+})
 
 //new methods
 t('repeat', t => {
