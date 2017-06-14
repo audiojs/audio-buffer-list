@@ -25,6 +25,16 @@ t('create with options argument', t => {
   t.end()
 })
 
+t('create with sample rate', t => {
+  var a = new AudioBufferList(0, {sampleRate: 70000})
+  a.append(70000)
+
+  t.equal(a.duration, 1)
+  t.equal(a.numberOfChannels, 1)
+
+  t.end()
+})
+
 //new methods
 t('repeat', t => {
   var a = new AudioBufferList(util.create(10, 2))

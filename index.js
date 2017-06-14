@@ -115,7 +115,7 @@ AudioBufferList.prototype.append = function (buf) {
   }
   //create AudioBuffer from (possibly num) arg
   else if (buf) {
-    buf = util.create(buf, this.numberOfChannels)
+    buf = util.create(buf, this.numberOfChannels, this.sampleRate)
     this._appendBuffer(buf)
   }
 
