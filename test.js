@@ -57,7 +57,6 @@ t('repeat', t => {
 })
 
 t('map', t => {
-
   //full map
   let list = new AudioBufferList([util.fill(util.create(2, 2), 1), util.fill(util.create(2, 2), 0)])
 
@@ -93,19 +92,19 @@ t('map', t => {
   //recalculates length & duration
   let list5 = AudioBufferList([util.create([1,1]), util.create([.5,.5]), util.create([-1,-1])])
 
-  let list5res = list5.map((buf, idx, offset) => {
+  list5.map((buf, idx, offset) => {
     if (idx === 0) t.equal(offset, 0)
-    else if (idx === 2) t.equal(offset, 2)
+    else if (idx === 2) {
+      t.equal(offset, 4)
+      return null
+    }
 
     if (idx === 1) {
       buf.copyToChannel(new Float32Array([0,0]), 0)
-      return null
     }
   })
-  t.deepEqual(list5.length, 6)
-  t.deepEqual(getChannelData(list5, 0), [1,1,0,0,-1,-1])
-  t.deepEqual(list5res.length, 4)
-  t.deepEqual(getChannelData(list5res, 0), [1,1,-1,-1])
+  t.deepEqual(list5.length, 4)
+  t.deepEqual(getChannelData(list5, 0), [1,1,0,0])
   t.end()
 })
 
@@ -113,7 +112,7 @@ t('each', t => {
   //full each
   let list = new AudioBufferList([util.fill(util.create(2, 2), 1), util.fill(util.create(2, 2), 0)])
 
-  list.each((b, idx) => {
+  list.map((b, idx) => {
     return util.fill(b, idx)
   })
 
@@ -123,7 +122,7 @@ t('each', t => {
   //subset each
   let list2 = new AudioBufferList([util.fill(util.create(4, 2), 0), util.fill(util.create(4, 2), 0)])
 
-  list2.each((b, idx, offset) => {
+  list2.map((b, idx, offset) => {
     return util.fill(b, 1, Math.max(2 - offset, 0), Math.min(6 - offset, b.length))
   }, 2, 6)
 
@@ -135,13 +134,12 @@ t('each', t => {
   //recalculates length & duration
   let list5 = AudioBufferList([util.create([1,1]), util.create([.5,.5]), util.create([-1,-1])])
 
-  list5.each((buf, idx, offset) => {
+  list5.map((buf, idx, offset) => {
     if (idx === 0) t.equal(offset, 0)
     else if (idx === 2) t.equal(offset, 4)
 
     if (idx === 1) {
       buf.copyToChannel(new Float32Array([0,0]), 0)
-      return null
     }
   })
   t.deepEqual(list5.length, 6)
@@ -149,7 +147,7 @@ t('each', t => {
 
   //break vicious cycle
   let list6 = AudioBufferList(util.create(2)).repeat(4)
-  list6.each((buf, idx, offset) => {
+  list6.map((buf, idx, offset) => {
     if (idx > 1) return false
       t.ok(idx <= 1)
   })
@@ -158,7 +156,7 @@ t('each', t => {
   let list7 = AudioBufferList(2).repeat(4)
   t.equal(list7.length, 8)
   let arr = []
-  list7.each((buf, idx, offset) => {
+  list7.map((buf, idx, offset) => {
     arr.push(idx)
   }, {reversed: true})
   t.deepEqual(arr, [3,2,1,0])
@@ -193,6 +191,7 @@ t('AudioBuffer properties', t => {
 
 	t.end()
 })
+
 
 t('getChannelData', function (t) {
   let bl = new AudioBufferList([util.create(2, 2), util.create(2, 2), util.create(2, 2)])
@@ -240,34 +239,50 @@ t('split/join', t => {
 
   t.equal(a.length, 10)
   t.equal(a.buffers.length, 1)
+  t.equal(l(a.buffers), a.length)
 
   a.split(4)
 
   t.equal(a.buffers.length, 2)
+  t.equal(l(a.buffers), a.length)
 
   a.split(4)
 
   t.equal(a.buffers.length, 2)
+  t.equal(l(a.buffers), a.length)
 
   a.split(5)
 
   t.equal(a.buffers.length, 3)
+  t.equal(l(a.buffers), a.length)
 
   a.split(10)
 
   t.equal(a.buffers.length, 3)
+  t.equal(l(a.buffers), a.length)
 
   a.split(9,8)
 
   t.equal(a.buffers.length, 5)
+  t.equal(l(a.buffers), a.length)
 
   a.split([7,6])
 
   t.equal(a.buffers.length, 7)
+  t.equal(l(a.buffers), a.length)
 
-  a.join()
+  let x = a.join()
 
   t.equal(a.buffers.length, 1)
+  t.equal(l(a.buffers), a.length)
+
+  function l (bufs) {
+    let l = 0
+    for (let i = 0; i < bufs.length; i++) {
+      l += bufs[i].length
+    }
+    return l
+  }
 
   t.end()
 })

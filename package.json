@@ -32,7 +32,7 @@
   "homepage": "https://github.com/audiojs/audio-buffer-list",
   "dependencies": {
     "audio-buffer": "^4.0.1",
-    "audio-buffer-utils": "^5.0.0",
+    "audio-buffer-utils": "^5.1.1",
     "is-audio-buffer": "^1.0.5",
     "is-plain-obj": "^1.1.0",
     "negative-index": "^1.0.2",

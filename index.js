@@ -393,41 +393,6 @@ AudioBufferList.prototype.consume = function consume (size) {
 
 //return new list via applying fn to each buffer from the indicated range
 AudioBufferList.prototype.map = function map (fn, from, to) {
-  if (from == null) from = 0
-  if (to == null) to = this.length
-  from = nidx(from, this.length)
-  to = nidx(to, this.length)
-
-  let fromOffset = this.offset(from)
-  let toOffset = this.offset(to)
-
-  let offset = from - fromOffset[1]
-  let before = this.buffers.slice(0, fromOffset[0])
-  let after = this.buffers.slice(toOffset[0] + 1)
-  let middle = this.buffers.slice(fromOffset[0], toOffset[0] + 1)
-
-  middle = middle.map((buf, idx) => {
-    let result = fn.call(this, buf, idx, offset, this.buffers, this)
-    if (result === undefined || result === true) result = buf
-    //ignore removed buffers
-    if (!result) {
-      return null;
-    }
-
-    //track offset
-    offset += result.length
-
-    return result
-  })
-  .filter((buf) => {
-    return buf ? !!buf.length : false
-  })
-
-  return new AudioBufferList(before.concat(middle).concat(after), this.numberOfChannels)
-}
-
-//apply fn to every buffer for the indicated range
-AudioBufferList.prototype.each = function each (fn, from, to, reversed) {
   let options = arguments[arguments.length - 1]
   if (!isPlainObj(options)) options = {reversed: false}
 
@@ -436,8 +401,12 @@ AudioBufferList.prototype.each = function each (fn, from, to, reversed) {
   from = nidx(from, this.length)
   to = nidx(to, this.length)
 
+  this.split(from, to)
+
   let fromOffset = this.offset(from)
   let toOffset = this.offset(to)
+
+  let offset = from - fromOffset[1]
 
   if (options.reversed) {
     let offset = to - toOffset[1]
@@ -445,6 +414,7 @@ AudioBufferList.prototype.each = function each (fn, from, to, reversed) {
       let buf = this.buffers[i]
       let res = fn.call(this, buf, i, offset, this.buffers, this)
       if (res === false) break
+      if (res !== undefined) this.buffers[i] = res
       offset -= buf.length
     }
   }
@@ -454,12 +424,28 @@ AudioBufferList.prototype.each = function each (fn, from, to, reversed) {
       let buf = this.buffers[i]
       let res = fn.call(this, buf, i, offset, this.buffers, this)
       if (res === false) break
+      if (res !== undefined) {
+        this.buffers[i] = res
+      }
       offset += buf.length
     }
   }
 
-  return this;
+  this.buffers = this.buffers.filter(buf => {
+    return buf ? !!buf.length : false
+  })
+
+  let l = 0
+  for (let i = 0; i < this.buffers.length; i++) {
+    this.numberOfChannels = Math.max(this.buffers[i].numberOfChannels, this.numberOfChannels)
+    l += this.buffers[i].length
+  }
+  this.length = l
+  this.duration = this.length / this.sampleRate
+
+  return this
 }
+
 
 //reverse subpart
 AudioBufferList.prototype.reverse = function reverse (from, to) {
@@ -470,9 +456,7 @@ AudioBufferList.prototype.reverse = function reverse (from, to) {
   to = nidx(to, this.length)
 
   let sublist = this.slice(from, to)
-  .each((buf) => {
-    util.reverse(buf)
-  })
+  .map((buf) => util.reverse(buf))
   sublist.buffers.reverse()
 
   this.remove(from, to-from)
@@ -517,12 +501,12 @@ AudioBufferList.prototype.join = function join (from, to) {
   to = nidx(to, this.length)
 
   let fromOffset = this.offset(from)
-  let toOffset = this.offset(to)
+  let toOffset = to >= this.length - 1 ? [this.buffers.length] : this.offset(to)
 
   let bufs = this.buffers.slice(fromOffset[0], toOffset[0])
   let buf = util.concat(bufs)
 
   this.buffers.splice.apply(this.buffers, [fromOffset[0], toOffset[0] - fromOffset[0] + (toOffset[1] ? 1 : 0)].concat(buf))
 
-  return this
+  return buf
 }

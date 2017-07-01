@@ -32,7 +32,6 @@ abl.slice() // <AudioBuffer 0, .1, .2, .3, 0...>
 * [list.slice(from?, to?)](#listslicestart0-end-0)
 * [list.clone(from?, to?)](#listclonestart0-end-0)
 * [list.map(fn, from?, to?)](#listmapbuffer-index-offset--bufferbool-from0-to-0)
-* [list.each(fn, from?, to?, opt?)](#listeachbuffer-index-offset---from0-to-0-reversed)
 * [list.reverse(from?, to?)](#listreversestart0-end-0)
 * [list.repeat(times)](#listrepeatcount)
 * [list.copy(dst?, from?, to?)](#listcopydest-start0-end-0)
@@ -83,15 +82,19 @@ Delete data from the beginning. Returns current list.
 
 ### `list.slice(start=0, end=-0)`
 
-Return sublist of the initial list. The data is not copied but returned as subarrays. `list.slice()` just creates a duplicate that way.
+Return sublist of the initial list. The data is not copied but returned as subarrays.
 
 ### `list.clone(start=0, end=-0)`
 
 Return copy of the list, consisting of cloned buffers.
 
-### `list.map((buffer, index, offset) => buffer|bool?, from=0, to=-0)`
+### `list.map(mapper, from=0, to=-0, {reversed: false})`
 
-Create new list by mapping every buffer. Optionally pass offsets `from` and `to` to map only buffers covering the subset, keeping the rest unchanged. If no buffer returned from the mapper function then the old buffer will be preserved. If `null` returned then the buffer will be discarded. `offset` tracks absolute `buffer` offset in new list, `index` reflects buffer count.
+Map buffers of subpart of the list, defined by `from` and `to` arguments. Modifies list in-place.
+
+Mapper function has signature `(buffer, idx, offset) => buffer`. `buffer` is an audio buffer to process, `idx` is buffer number, and `offset` is first buffer sample absolute offset. If mapper returns `undefined`, the buffer is preserved. If mapper returns `null`, the buffer is discarded. If mapper returns `false`, iterations are stopped.
+
+Pass `{reversed: true}` option to walk in reversed order.
 
 ```js
 list = list.map((buf, idx, offset) => {
@@ -100,20 +103,15 @@ list = list.map((buf, idx, offset) => {
 
     //start buffer from the subset may start earlier than the subset
     //end buffer from the subset may end later than the subset
-    for (let i = Math.max(from - offset, 0), l = Math.min(to - offset, buf.length); i < l; i++) {
+    for (let i = 0, l = buf.length; i < l; i++) {
       data[i] = process(data[i])
     }
   }
 }, from, to)
 ```
-
-### `list.each((buffer, index, offset) => {}, from=0, to=-0, {reversed}?)`
-
-Iterate over buffers from the indicated range. Buffers can be modified in-place during the iterating. Return `false` to break the loop. Pass `{reversed: true}` as the last argument to iterate in reverse order.
-
 ### `list.reverse(start=0, end=-0)`
 
-Reverse indicated part of the list. Modifies list in place, returns self.
+Reverse indicated part of the list. Modifies list in place.
 
 ### `list.repeat(count)`
 
@@ -131,13 +129,13 @@ Put data from the channel to destination _FloatArray_. Optional `startInChannel`
 
 Put data from the source _FloatArray_ into channel, optionally starting at `startInChannel` offset.
 
-### `list.split(a, b, c, ...)`
+### `list.split([a, b, c, ...], d, e, ...)`
 
 Split list at the indicated indexes. That increases number of inner buffers.
 
 ### `list.join(start=0, end=-0)`
 
-Joins buffers from the indicated range.
+Joins buffers from the indicated range. Returns an AudioBuffer with joined data.
 
 ### `list.offset(idx)`
 
