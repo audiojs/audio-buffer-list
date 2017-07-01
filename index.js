@@ -406,8 +406,6 @@ AudioBufferList.prototype.map = function map (fn, from, to) {
   let fromOffset = this.offset(from)
   let toOffset = this.offset(to)
 
-  let offset = from - fromOffset[1]
-
   if (options.reversed) {
     let offset = to - toOffset[1]
     for (let i = toOffset[0], l = fromOffset[0]; i >= l; i--) {
