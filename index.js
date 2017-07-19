@@ -56,24 +56,33 @@ AudioBufferList.prototype.copyFromChannel = function (destination, channel, from
   to = nidx(to, this.length)
 
   var fromOffset = this.offset(from)
-  var offset = from - fromOffset[1]
+  var bufOffset = from - fromOffset[1]
   var initialOffset = from
   var toOffset = this.offset(to)
+
+  if (fromOffset[0] === toOffset[0]) {
+    var buf = this.buffers[fromOffset[0]]
+    var data = buf.getChannelData(channel).subarray(fromOffset[1], toOffset[1])
+    destination.set(data)
+    return this
+  }
+
   for (var i = fromOffset[0], l = toOffset[0]; i < l; i++) {
     var buf = this.buffers[i]
     var data = buf.getChannelData(channel)
-    if (from > offset) data = data.subarray(from - offset)
+    if (from > bufOffset) data = data.subarray(from - bufOffset)
     if (channel < buf.numberOfChannels) {
-      destination.set(data, Math.max(0, offset - initialOffset))
+      destination.set(data, Math.max(0, -initialOffset + bufOffset))
     }
-    offset += buf.length
+    bufOffset += buf.length
   }
 
   var lastBuf = this.buffers[toOffset[0]]
   if (toOffset[1]) {
-    destination.set(lastBuf.getChannelData(channel).subarray(0, toOffset[1]), offset - initialOffset)
+    destination.set(lastBuf.getChannelData(channel).subarray(0, toOffset[1]), Math.max(0, bufOffset - initialOffset))
   }
 
+  return this
 }
 
 //put data from array to channel
@@ -92,6 +101,8 @@ AudioBufferList.prototype.copyToChannel = function (source, channel, from) {
     }
     offset += buf.length
   }
+
+  return this
 }
 
 

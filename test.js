@@ -223,13 +223,29 @@ t('copyToChannel', function (t) {
 t('copyFromChannel', function (t) {
 	var a = new AudioBufferList(util.fill(util.create(20, 2), (v, idx, channel) => channel ? 1 : -1)).repeat(2);
 
-	var arr = new Float32Array(40)
+  var arr
+	arr = new Float32Array(40)
 	a.copyFromChannel(arr, 0);
 	t.deepEqual(arr, getChannelData(a, 0));
 
 	a.copyFromChannel(arr, 1, 10);
 	var result = Array(30).fill(1).concat(Array(10).fill(-1));
 	t.deepEqual(arr, result);
+
+  arr = new Float32Array(40)
+  a.copyFromChannel(arr, 0, 2, 10)
+  var result = Array(8).fill(-1).concat(Array(32).fill(0))
+  t.deepEqual(arr, result)
+
+  arr = new Float32Array(40)
+  a.copyFromChannel(arr, 0, 2, 9)
+  var result = Array(7).fill(-1).concat(Array(33).fill(0))
+  t.deepEqual(arr, result)
+
+  arr = new Float32Array(40)
+  a.copyFromChannel(arr, 0, 2, 11)
+  var result = Array(9).fill(-1).concat(Array(31).fill(0))
+  t.deepEqual(arr, result)
 
 	t.end()
 })
