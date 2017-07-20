@@ -217,8 +217,13 @@ t('copyToChannel', function (t) {
 	arr.set(zeros);
 
 	t.deepEqual(arr, getChannelData(a, 1));
+
+  a.copyToChannel(new Float32Array([0]), 0, 1)
+  t.deepEqual(getChannelData(a, 0), [-1, 0, -1, -1])
+
 	t.end()
 })
+
 
 t('copyFromChannel', function (t) {
 	var a = new AudioBufferList(util.fill(util.create(20, 2), (v, idx, channel) => channel ? 1 : -1)).repeat(2);

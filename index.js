@@ -91,15 +91,18 @@ AudioBufferList.prototype.copyToChannel = function (source, channel, from) {
   from = nidx(from, this.length)
 
   var offsets = this.offset(from)
-  var offset = from - offsets[1]
+  var bufOffset = from - offsets[1]
+
+  source = source.subarray(0, this.length - from)
 
   for (var i = offsets[0], l = this.buffers.length; i < l; i++) {
     var buf = this.buffers[i]
-    var data = buf.getChannelData(channel)
+    var channelData = buf.getChannelData(channel)
     if (channel < buf.numberOfChannels) {
-      data.set(source.subarray(Math.max(offset, from), offset + data.length), Math.max(0, from - offset));
+      var chunk = source.subarray(Math.max(0, bufOffset - from), bufOffset - from + buf.length)
+      channelData.set(chunk, from > bufOffset ? from : 0);
     }
-    offset += buf.length
+    bufOffset += buf.length
   }
 
   return this
