@@ -431,8 +431,12 @@ AudioBufferList.prototype.map = function map (fn, from, to) {
     }
   }
   else {
+    if (toOffset[1]) {
+      toOffset[0] += 1
+      toOffset[1] = 0
+    }
     let offset = from - fromOffset[1]
-    for (let i = fromOffset[0], l = toOffset[0]+1; i < l; i++) {
+    for (let i = fromOffset[0], l = toOffset[0]; i < l; i++) {
       let buf = this.buffers[i]
       let res = fn.call(this, buf, i, offset, this.buffers, this)
       if (res === false) break

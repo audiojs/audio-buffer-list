@@ -90,7 +90,7 @@ Return copy of the list, consisting of cloned buffers.
 
 ### `list.map(mapper, from=0, to=-0, {reversed: false})`
 
-Map buffers of subpart of the list, defined by `from` and `to` arguments. Modifies list in-place.
+Map buffers of part of the list, defined by `from` and `to` arguments. Modifies list in-place.
 
 Mapper function has signature `(buffer, idx, offset) => buffer`. `buffer` is an audio buffer to process, `idx` is buffer number, and `offset` is first buffer sample absolute offset. If mapper returns `undefined`, the buffer is preserved. If mapper returns `null`, the buffer is discarded. If mapper returns `false`, iterations are stopped.
 

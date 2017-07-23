@@ -56,8 +56,7 @@ t('repeat', t => {
 	t.end()
 })
 
-t('map', t => {
-  //full map
+t('full map', t => {
   let list = new AudioBufferList([util.fill(util.create(2, 2), 1), util.fill(util.create(2, 2), 0)])
 
   let dest = list.map((b, idx) => {
@@ -67,7 +66,23 @@ t('map', t => {
   t.deepEqual(getChannelData(dest, 0), Array(2).fill(0).concat(Array(2).fill(1)))
   t.deepEqual(getChannelData(dest, 1), Array(2).fill(0).concat(Array(2).fill(1)))
 
-  //subset map
+  t.end()
+})
+
+t('each last elem', t => {
+  let list = AudioBufferList([0, 1, 2, 3, 4])
+
+  let c = 0
+  list.map(b => {
+    c++
+  }, 1, 3)
+
+  t.equal(c, 1)
+
+  t.end()
+})
+
+t('subset map', t => {
   let list2 = new AudioBufferList([util.fill(util.create(4, 2), 0), util.fill(util.create(4, 2), 0)])
 
   let dest2 = list2.map((b, idx, offset) => {
@@ -76,11 +91,19 @@ t('map', t => {
 
   t.deepEqual(getChannelData(dest2, 1), Array(2).fill(0).concat(Array(4).fill(1)).concat(Array(2).fill(0)))
 
-  //subset length
-  let list3 = new AudioBufferList(util.create([0,1,0,-1], 1))
-  list3 = list3.map((b, idx) => {return b}, 0, 4)
-  t.equal(list3.length, 4)
+  t.end()
+})
 
+t('map subset length', t => {
+  //subset length
+  let list3 = new AudioBufferList([util.create([0,1,0], 1), util.create([-1,1,0,-1], 1)])
+  list3 = list3.map((b, idx) => {return b}, 0, 4)
+  t.equal(list3.length, 7)
+
+  t.end()
+})
+
+t('map upd channels', t => {
   //upd channels
   let list4 = new AudioBufferList([util.create(1, 1), util.create(1, 2)])
   list4 = list4.map(buf => util.create(1, 3))
@@ -152,6 +175,10 @@ t('each', t => {
       t.ok(idx <= 1)
   })
 
+  t.end()
+})
+
+t('reverse each', t => {
   //do reversed walking
   let list7 = AudioBufferList(2).repeat(4)
   t.equal(list7.length, 8)
@@ -163,6 +190,7 @@ t('each', t => {
 
   t.end()
 })
+
 
 t('reverse', t => {
   let list = AudioBufferList(util.create([0,1,2, 3,4,5])).split(3)
