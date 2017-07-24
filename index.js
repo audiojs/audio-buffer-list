@@ -463,25 +463,6 @@ AudioBufferList.prototype.map = function map (fn, from, to) {
 }
 
 
-//reverse subpart
-AudioBufferList.prototype.reverse = function reverse (from, to) {
-  if (from == null) from = 0
-  if (to == null) to = this.length
-
-  from = nidx(from, this.length)
-  to = nidx(to, this.length)
-
-  let sublist = this.slice(from, to)
-  .map((buf) => util.reverse(buf))
-  sublist.buffers.reverse()
-
-  this.remove(from, to-from)
-
-  this.insert(from, sublist)
-
-  return this
-}
-
 //split at the indicated indexes
 AudioBufferList.prototype.split = function split () {
   let args = arguments;
@@ -517,9 +498,15 @@ AudioBufferList.prototype.join = function join (from, to) {
   to = nidx(to, this.length)
 
   let fromOffset = this.offset(from)
-  let toOffset = to >= this.length - 1 ? [this.buffers.length] : this.offset(to)
+  let toOffset = this.offset(to)
+
+  if (toOffset[1]) {
+    toOffset[0] += 1
+    toOffset[1] = 0
+  }
 
   let bufs = this.buffers.slice(fromOffset[0], toOffset[0])
+
   let buf = util.concat(bufs)
 
   this.buffers.splice.apply(this.buffers, [fromOffset[0], toOffset[0] - fromOffset[0] + (toOffset[1] ? 1 : 0)].concat(buf))

@@ -32,7 +32,6 @@ abl.slice() // <AudioBuffer 0, .1, .2, .3, 0...>
 * [list.slice(from?, to?)](#listslicestart0-end-0)
 * [list.clone(from?, to?)](#listclonestart0-end-0)
 * [list.map(fn, from?, to?)](#listmapbuffer-index-offset--bufferbool-from0-to-0)
-* [list.reverse(from?, to?)](#listreversestart0-end-0)
 * [list.repeat(times)](#listrepeatcount)
 * [list.copy(dst?, from?, to?)](#listcopydest-start0-end-0)
 * [list.copyFromChannel(dst, ch, from?, to?)](#listcopyfromchannelarr-channel-startinchannel0)
@@ -109,9 +108,6 @@ list = list.map((buf, idx, offset) => {
   }
 }, from, to)
 ```
-### `list.reverse(start=0, end=-0)`
-
-Reverse indicated part of the list. Modifies list in place.
 
 ### `list.repeat(count)`
 

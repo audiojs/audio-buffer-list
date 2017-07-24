@@ -192,7 +192,7 @@ t('reverse each', t => {
 })
 
 
-t('reverse', t => {
+t.skip('reverse', t => {
   let list = AudioBufferList(util.create([0,1,2, 3,4,5])).split(3)
 
   list.reverse(1,5)
@@ -332,6 +332,18 @@ t('split/join', t => {
     }
     return l
   }
+
+  t.end()
+})
+
+t('join single', t => {
+  let l = new AudioBufferList([0, .1, .2, .3])
+
+  l.join(1, 2)
+
+  t.equal(l.buffers.length, 1)
+  t.equal(l.buffers[0].length, 4)
+  t.equal(l.length, 4)
 
   t.end()
 })
