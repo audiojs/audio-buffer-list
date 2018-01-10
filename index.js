@@ -16,7 +16,7 @@ var AudioBuffer = require('audio-buffer')
 module.exports = AudioBufferList
 
 
-
+// @constructor
 function AudioBufferList(arg, options) {
   if (!(this instanceof AudioBufferList)) return new AudioBufferList(arg, options)
 
@@ -43,10 +43,6 @@ function AudioBufferList(arg, options) {
 AudioBufferList.prototype.numberOfChannels = 1
 AudioBufferList.prototype.sampleRate = null
 
-//test instance
-AudioBufferList.isInstance = function (a) {
-  return a instanceof AudioBufferList
-}
 
 //copy from channel into destination array
 AudioBufferList.prototype.copyFromChannel = function (destination, channel, from, to) {
@@ -109,7 +105,6 @@ AudioBufferList.prototype.copyToChannel = function (source, channel, from) {
 }
 
 
-
 //patch BufferList methods
 AudioBufferList.prototype.append = function (buf) {
   //FIXME: we may want to do resampling/channel mapping here or something
@@ -136,19 +131,6 @@ AudioBufferList.prototype.append = function (buf) {
   return this
 }
 
-
-AudioBufferList.prototype.offset = function _offset (offset) {
-  var tot = 0, i = 0, _t
-  if (offset === 0) return [ 0, 0 ]
-  for (; i < this.buffers.length; i++) {
-    _t = tot + this.buffers[i].length
-    if (offset < _t || i == this.buffers.length - 1)
-      return [ i, offset - tot ]
-    tot = _t
-  }
-}
-
-
 AudioBufferList.prototype._appendBuffer = function (buf) {
   if (!buf) return this
 
@@ -170,6 +152,20 @@ AudioBufferList.prototype._appendBuffer = function (buf) {
 
   return this
 }
+
+
+AudioBufferList.prototype.offset = function _offset (offset) {
+  var tot = 0, i = 0, _t
+  if (offset === 0) return [ 0, 0 ]
+  for (; i < this.buffers.length; i++) {
+    _t = tot + this.buffers[i].length
+    if (offset < _t || i == this.buffers.length - 1)
+      return [ i, offset - tot ]
+    tot = _t
+  }
+}
+
+
 
 //copy data to destination audio buffer
 AudioBufferList.prototype.copy = function copy (dst, dstStart, srcStart, srcEnd) {
@@ -249,6 +245,16 @@ AudioBufferList.prototype.copy = function copy (dst, dstStart, srcStart, srcEnd)
   return dst
 }
 
+//create a new list with the same data
+AudioBufferList.prototype.clone = function clone (start, end) {
+  var i = 0, copy = new AudioBufferList(0, this.numberOfChannels), sublist = this.slice(start, end)
+
+  for (; i < sublist.buffers.length; i++)
+    copy.append(util.clone(sublist.buffers[i]))
+
+  return copy
+}
+
 //do superficial handle
 AudioBufferList.prototype.slice = function slice (start, end) {
   start = start || 0
@@ -279,15 +285,6 @@ AudioBufferList.prototype.slice = function slice (start, end) {
   return new AudioBufferList(buffers, this.numberOfChannels)
 }
 
-//clone with preserving data
-AudioBufferList.prototype.clone = function clone (start, end) {
-  var i = 0, copy = new AudioBufferList(0, this.numberOfChannels), sublist = this.slice(start, end)
-
-  for (; i < sublist.buffers.length; i++)
-    copy.append(util.clone(sublist.buffers[i]))
-
-  return copy
-}
 
 //clean up
 AudioBufferList.prototype.destroy = function destroy () {
@@ -303,7 +300,7 @@ AudioBufferList.prototype.repeat = function (times) {
   if (!times && times !== 0 || !Number.isFinite(times)) throw RangeError('Repeat count must be non-negative number.')
 
   if (!times) {
-    this.consume(this.length)
+    this.remove(0, this.length)
     return this
   }
 
@@ -334,7 +331,8 @@ AudioBufferList.prototype.insert = function (offset, source) {
 
   //convert any type of source to audio buffer list
   source = new AudioBufferList(source)
-  this.buffers.splice.apply(this.buffers, [offset[0], 0].concat(source.buffers))
+
+  this.buffers.splice.apply(this.buffers, [offset[0] + (offset[1] ? 1 : 0), 0].concat(source.buffers))
 
   //update params
   this.length += source.length
@@ -379,31 +377,6 @@ AudioBufferList.prototype.remove = function (offset, count) {
 
   return deleted
 }
-
-//delete samples from the list, return self
-AudioBufferList.prototype.delete = function () {
-  this.remove.apply(this, arguments)
-  return this
-}
-
-//remove N sampled from the beginning
-AudioBufferList.prototype.consume = function consume (size) {
-  while (this.buffers.length) {
-    if (size >= this.buffers[0].length) {
-      size -= this.buffers[0].length
-      this.length -= this.buffers[0].length
-      this.buffers.shift()
-    } else {
-      //util.subbuffer would remain buffer in memory though it is faster
-      this.buffers[0] = util.subbuffer(this.buffers[0], size)
-      this.length -= size
-      break
-    }
-  }
-  this.duration = this.length / this.sampleRate
-  return this
-}
-
 
 //return new list via applying fn to each buffer from the indicated range
 AudioBufferList.prototype.map = function map (fn, from, to) {

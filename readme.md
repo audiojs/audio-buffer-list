@@ -27,12 +27,8 @@ abl.slice() // <AudioBuffer 0, .1, .2, .3, 0...>
 * [list.append(buf)](#listappendbuffer)
 * [list.insert(idx?, buf)](#listinsertoffset0-buffer)
 * [list.remove(idx?, len)](#listremoveoffset0-count)
-* [list.delete(idx?, len)](#listdeleteoffset0-count)
-* [list.consume(len)](#listconsumecount)
 * [list.slice(from?, to?)](#listslicestart0-end-0)
-* [list.clone(from?, to?)](#listclonestart0-end-0)
-* [list.map(fn, from?, to?)](#listmapbuffer-index-offset--bufferbool-from0-to-0)
-* [list.repeat(times)](#listrepeatcount)
+* [list.map(val|fn, from?, to?)](#listmapbuffer-index-offset--bufferbool-from0-to-0)
 * [list.copy(dst?, from?, to?)](#listcopydest-start0-end-0)
 * [list.copyFromChannel(dst, ch, from?, to?)](#listcopyfromchannelarr-channel-startinchannel0)
 * [list.copyToChannel(src, ch, from?)](#listcopytochannelarr-channel-startinchannel0)
@@ -40,7 +36,8 @@ abl.slice() // <AudioBuffer 0, .1, .2, .3, 0...>
 * [list.join(from?, to?)](#listjoinstart0-end-0)
 * [list.offset(idx)](#listoffsetsample)
 * [list.destroy()](#listdestroy)
-* [AudioBufferList.isInatance(arg)](#audiobufferlistisinstancearg)
+
+<!-- * [list.repeat(times)](#listrepeatcount) -->
 
 ### `new AudioBufferList(source, options?)`
 
@@ -71,25 +68,14 @@ Put new AudioBuffer, AudioBufferList or array of them at the offset.
 
 Remove number of samples from the list starting at the `offset`. `count` can possibly be negative, then items are removed on the left side from the offset. `offset` can also be negative, meaning to remove from the end. Retuns removed sublist instance.
 
-### `list.delete(offset=0, count)`
-
-Same as `list.remove`, but returns current list with deleted part being lost. That allows for different type of chainability.
-
-### `list.consume(count)`
-
-Delete data from the beginning. Returns current list.
 
 ### `list.slice(start=0, end=-0)`
 
 Return sublist of the initial list. The data is not copied but returned as subarrays.
 
-### `list.clone(start=0, end=-0)`
-
-Return copy of the list, consisting of cloned buffers.
-
 ### `list.map(mapper, from=0, to=-0, {reversed: false})`
 
-Map buffers of part of the list, defined by `from` and `to` arguments. Modifies list in-place.
+Map buffers from the interval defined by `from` and `to` arguments. Modifies list in-place.
 
 Mapper function has signature `(buffer, idx, offset) => buffer`. `buffer` is an audio buffer to process, `idx` is buffer number, and `offset` is first buffer sample absolute offset. If mapper returns `undefined`, the buffer is preserved. If mapper returns `null`, the buffer is discarded. If mapper returns `false`, iterations are stopped.
 
@@ -141,9 +127,6 @@ Return `[bufIdx, offset]` pair for any sample number. `bufIdx` is the number of 
 
 Clean up list.
 
-### `AudioBufferList.isInstance(arg)`
-
-Check if passed argument is instance of _AudioBufferList_.
 
 ## See also
 

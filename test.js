@@ -13,7 +13,7 @@ function getChannelData(list, channel, from, to) {
   if (to == null) to = list.length
   let arr = new Float32Array(to - from)
   list.copyFromChannel(arr, channel, from, to)
-  return arr
+  return Array.from(arr)
 }
 
 t('create with options argument', t => {
@@ -402,6 +402,26 @@ t('insert', t => {
 	t.end()
 })
 
+t('insert to the end case', t => {
+  let a = AudioBufferList(7, {numberOfChannels: 3})
+
+  a.insert(0, util.create([[0,.5,1], [0, -.5, -1], [0,0,0]]))
+  t.deepEqual(getChannelData(a, 0), [0,.5,1, 0,0,0,0,0,0,0])
+  t.deepEqual(getChannelData(a, 1), [0,-.5,-1, 0,0,0,0,0,0,0])
+  t.deepEqual(getChannelData(a, 2), [0,0,0, 0,0,0,0,0,0,0])
+
+  a.insert(1, util.create(2, 3))
+  t.deepEqual(getChannelData(a, 0), [0,0,0,.5,1, 0,0,0,0,0,0,0])
+  t.deepEqual(getChannelData(a, 1), [0,0,0,-.5,-1, 0,0,0,0,0,0,0])
+  t.deepEqual(getChannelData(a, 2), [0,0,0,0,0, 0,0,0,0,0,0,0])
+
+  a.insert(-0, util.create([[0,0,0], [0,0,0], [1,1,1]]))
+  t.deepEqual(getChannelData(a, 0), [0,0,0,.5,1, 0,0,0,0,0,0,0,0,0,0])
+  t.deepEqual(getChannelData(a, 1), [0,0,0,-.5,-1, 0,0,0,0,0,0,0,0,0,0])
+  t.deepEqual(getChannelData(a, 2), [0,0,0,0,0, 0,0,0,0,0,0,0,1,1,1])
+
+  t.end()
+})
 
 
 //bl patch methods
@@ -587,23 +607,23 @@ t('consuming from multiple buffers', function (t) {
 
   t.deepEqual(getChannelData(bl.slice(0, 10), 0), [0,1,2,3,4,5,6,7,8,9])
 
-  bl.consume(3)
+  bl.remove(3)
   t.equal(bl.length, 7)
   t.deepEqual(getChannelData(bl.slice(0, 7), 0), [3,4,5,6,7,8,9])
 
-  bl.consume(2)
+  bl.remove(2)
   t.equal(bl.length, 5)
   t.deepEqual(getChannelData(bl.slice(0, 5), 0), [5,6,7,8,9])
 
-  bl.consume(1)
+  bl.remove(1)
   t.equal(bl.length, 4)
   t.deepEqual(getChannelData(bl.slice(0, 4), 0), [6,7,8,9])
 
-  bl.consume(1)
+  bl.remove(1)
   t.equal(bl.length, 3)
   t.deepEqual(getChannelData(bl.slice(0, 3), 0), [7,8,9])
 
-  bl.consume(2)
+  bl.remove(2)
   t.equal(bl.length, 1)
   t.deepEqual(getChannelData(bl.slice(0, 1), 0), [9])
 
@@ -616,7 +636,7 @@ t('complete consumption', function (t) {
   bl.append(util.create([0]))
   bl.append(util.create([1]))
 
-  bl.consume(2)
+  bl.remove(2)
 
   t.equal(bl.length, 0)
   t.equal(bl.buffers.length, 0)
@@ -770,7 +790,7 @@ t('clone', function (t) {
   t.plan(2)
 
   var bl = new AudioBufferList(util.create([0,1,2,3,4,5,6,7,8,9]))
-    , dup = bl.clone()
+    , dup = bl.copy()
 
   t.equal(bl.prototype, dup.prototype)
   t.deepEqual(getChannelData(bl, 0), getChannelData(dup, 0))
@@ -791,7 +811,7 @@ t('slice', function (t) {
 
   t.equal(l.numberOfChannels, 2)
 
-  l.consume(10)
+  l.remove(10)
 
   t.equal(l.numberOfChannels, 2)
 
