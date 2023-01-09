@@ -3,7 +3,6 @@
  */
 
 import util from 'audio-buffer-utils'
-import AudioBuffer from 'audio-buffer'
 
 export default AudioBufferList
 
@@ -163,8 +162,8 @@ AudioBufferList.prototype.copy = function copy (dst, dstStart, srcStart, srcEnd)
 
   if (typeof srcStart != 'number' || srcStart < 0) srcStart = 0
   if (typeof srcEnd != 'number' || srcEnd > this.length) srcEnd = this.length
-  if (srcStart >= this.length) return dst || new AudioBuffer(null, {length: 0})
-  if (srcEnd <= 0) return dst || new AudioBuffer(null, {length: 0})
+  if (srcStart >= this.length) return dst || util.create({length: 0,sampleRate:this.sampleRate})
+  if (srcEnd <= 0) return dst || util.create({length: 0,sampleRate:this.sampleRate})
 
   var copy   = !!dst
     , off    = this.offset(srcStart)
