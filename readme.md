@@ -7,9 +7,9 @@ Extension of [BufferList](https://npmjs.org/package/bl) for [AudioBuffers](https
 [![npm install audio-buffer-list](https://nodei.co/npm/audio-buffer-list.png?mini=true)](https://npmjs.org/package/audio-buffer-list/)
 
 ```js
-const AudioBufferList = require('audio-buffer-list')
-const AudioBuffer = require('audio-buffer')
-const util = require('audio-buffer-utils')
+import AudioBufferList from 'audio-buffer-list'
+import AudioBuffer from 'audio-buffer'
+import util from 'audio-buffer-utils'
 
 let abl = new AudioBufferList(util.create([0, .1, .2, .3]), util.create(100))
 
