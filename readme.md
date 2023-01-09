@@ -73,7 +73,7 @@ Remove number of samples from the list starting at the `offset`. `count` can pos
 
 Return sublist of the initial list. The data is not copied but returned as subarrays.
 
-### `list.map(mapper, from=0, to=-0, {reversed: false})`
+### `list.map(mapper, from=0, to=-0)`
 
 Map buffers from the interval defined by `from` and `to` arguments. Modifies list in-place.
 
@@ -94,6 +94,10 @@ list = list.map((buf, idx, offset) => {
   }
 }, from, to)
 ```
+
+### `list.reverseMap(mapper, from=0, to=-0)`
+
+Same as map, but runs from tail (to break preliminarily).
 
 ### `list.repeat(count)`
 

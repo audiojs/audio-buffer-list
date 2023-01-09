@@ -7,6 +7,7 @@
     "test": "node test",
     "test:browser": "budo test"
   },
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/audiojs/audio-buffer-list"
@@ -33,10 +34,7 @@
   "dependencies": {
     "audio-buffer": "^4.0.1",
     "audio-buffer-utils": "^5.1.1",
-    "is-audio-buffer": "^1.0.5",
-    "is-plain-obj": "^1.1.0",
-    "negative-index": "^1.0.2",
-    "object-assign": "^4.1.1"
+    "is-plain-obj": "^1.1.0"
   },
   "devDependencies": {
     "tape": "^4.6.3"

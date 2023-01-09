@@ -1,11 +1,6 @@
-'use strict';
-
-const t = require('tape')
-const AudioBufferList = require('./')
-const AudioBuffer = require('audio-buffer')
-const util = require('audio-buffer-utils')
-const isAudioBuffer = require('is-audio-buffer')
-const fs = require('fs')
+import t from 'tape'
+import AudioBufferList from './index.js'
+import util from 'audio-buffer-utils'
 
 
 function getChannelData(list, channel, from, to) {
@@ -49,7 +44,7 @@ t('repeat', t => {
   c.repeat(2)
   t.equal(c.length, 20)
 
-  let d = AudioBufferList(2, 2).repeat(4)
+  let d = new AudioBufferList(2, 2).repeat(4)
   t.equal(d.numberOfChannels, 2)
   t.equal(d.length, 8)
 
@@ -70,7 +65,7 @@ t('full map', t => {
 })
 
 t('each last elem', t => {
-  let list = AudioBufferList([0, 1, 2, 3, 4])
+  let list = new AudioBufferList([0, 1, 2, 3, 4])
 
   let c = 0
   list.map(b => {
@@ -113,7 +108,7 @@ t('map upd channels', t => {
   //track offset
   //filter null/zeros
   //recalculates length & duration
-  let list5 = AudioBufferList([util.create([1,1]), util.create([.5,.5]), util.create([-1,-1])])
+  let list5 = new AudioBufferList([util.create([1,1]), util.create([.5,.5]), util.create([-1,-1])])
 
   list5.map((buf, idx, offset) => {
     if (idx === 0) t.equal(offset, 0)
@@ -155,7 +150,7 @@ t('each', t => {
   //track offset
   //filter null/zeros
   //recalculates length & duration
-  let list5 = AudioBufferList([util.create([1,1]), util.create([.5,.5]), util.create([-1,-1])])
+  let list5 = new AudioBufferList([util.create([1,1]), util.create([.5,.5]), util.create([-1,-1])])
 
   list5.map((buf, idx, offset) => {
     if (idx === 0) t.equal(offset, 0)
@@ -169,7 +164,7 @@ t('each', t => {
   t.deepEqual(getChannelData(list5, 0), [1,1,0,0,-1,-1])
 
   //break vicious cycle
-  let list6 = AudioBufferList(util.create(2)).repeat(4)
+  let list6 = new AudioBufferList(util.create(2)).repeat(4)
   list6.map((buf, idx, offset) => {
     if (idx > 1) return false
       t.ok(idx <= 1)
@@ -180,10 +175,10 @@ t('each', t => {
 
 t('reverse each', t => {
   //do reversed walking
-  let list7 = AudioBufferList(2).repeat(4)
+  let list7 = new AudioBufferList(2).repeat(4)
   t.equal(list7.length, 8)
   let arr = []
-  list7.map((buf, idx, offset) => {
+  list7.reverseMap((buf, idx, offset) => {
     arr.push(idx)
   }, {reversed: true})
   t.deepEqual(arr, [3,2,1,0])
@@ -193,7 +188,7 @@ t('reverse each', t => {
 
 
 t.skip('reverse', t => {
-  let list = AudioBufferList(util.create([0,1,2, 3,4,5])).split(3)
+  let list = new AudioBufferList(util.create([0,1,2, 3,4,5])).split(3)
 
   list.reverse(1,5)
 
@@ -284,7 +279,7 @@ t('copyFromChannel', function (t) {
 })
 
 t('split/join', t => {
-  let a = AudioBufferList(10)
+  let a = new AudioBufferList(10)
 
   t.equal(a.length, 10)
   t.equal(a.buffers.length, 1)
@@ -366,12 +361,12 @@ t('remove', t => {
   t.deepEqual(getChannelData(a,0), Array(8).fill(0))
   t.deepEqual(getChannelData(a,1), Array(8).fill(1))
 
-  var b = AudioBufferList([util.create([0,1,2]), util.create([3,4,5])])
+  var b = new AudioBufferList([util.create([0,1,2]), util.create([3,4,5])])
 
   b.remove(1, 4)
   t.equal(b.length, 2)
 
-  var c = AudioBufferList(3).repeat(2)
+  var c = new AudioBufferList(3).repeat(2)
   c.remove(5, 3)
   t.equal(c.length, 5)
 
@@ -403,7 +398,7 @@ t('insert', t => {
 })
 
 t('insert to the end case', t => {
-  let a = AudioBufferList(7, {numberOfChannels: 3})
+  let a = new AudioBufferList(7, {numberOfChannels: 3})
 
   a.insert(0, util.create([[0,.5,1], [0, -.5, -1], [0,0,0]]))
   t.deepEqual(getChannelData(a, 0), [0,.5,1, 0,0,0,0,0,0,0])
@@ -680,7 +675,7 @@ t('test readUInt16LE / readUInt16BE / readInt16LE / readInt16BE', function (t) {
 t('basic copy', function (t) {
   var buf  = util.noise(util.create(1024))
     , buf2 = util.create(1024)
-    , b    = AudioBufferList(buf)
+    , b    = new AudioBufferList(buf)
   b.copy(buf2)
   t.deepEqual(getChannelData(b, 0), getChannelData(buf2, 0), 'same buffer')
   t.end()
@@ -689,7 +684,7 @@ t('basic copy', function (t) {
 t('copy after many appends', function (t) {
   var buf  = util.noise(util.create(512))
     , buf2 = util.create(1024)
-    , b    = AudioBufferList(buf)
+    , b    = new AudioBufferList(buf)
 
   b.append(buf)
   b.copy(buf2)
@@ -700,7 +695,7 @@ t('copy after many appends', function (t) {
 t('copy at a precise position', function (t) {
   var buf  = util.noise(util.create(1004))
     , buf2 = util.create(1024)
-    , b    = AudioBufferList(buf)
+    , b    = new AudioBufferList(buf)
 
   b.copy(buf2, 20)
   t.deepEqual(getChannelData(b, 0), util.slice(buf2, 20).getChannelData(0), 'same buffer')
@@ -710,7 +705,7 @@ t('copy at a precise position', function (t) {
 t('copy starting from a precise location', function (t) {
   var buf  = util.noise(util.create(10))
     , buf2 = util.create(5)
-    , b    = AudioBufferList(buf)
+    , b    = new AudioBufferList(buf)
 
   b.copy(buf2, 0, 5)
   t.deepEqual(getChannelData(b.slice(0, 5), 0), buf2.getChannelData(0), 'same buffer')
@@ -719,7 +714,7 @@ t('copy starting from a precise location', function (t) {
 
 t('copy in an interval', function (t) {
   var rnd      = util.noise(util.create(10))
-    , b        = AudioBufferList(rnd) // put the random bytes there
+    , b        = new AudioBufferList(rnd) // put the random bytes there
     , actual   = util.create(3)
     , expected = util.create(3)
 
@@ -733,7 +728,7 @@ t('copy in an interval', function (t) {
 t('copy an interval between two buffers', function (t) {
   var buf      = util.noise(util.create(10))
     , buf2     = util.create(10)
-    , b        = AudioBufferList(buf)
+    , b        = new AudioBufferList(buf)
 
   b.append(buf)
   b.copy(buf2, 0, 5, 15)
@@ -823,10 +818,10 @@ t('slice', function (t) {
 })
 
 t('zero buffers', function (t) {
-  let a = AudioBufferList(0, 2)
+  let a = new AudioBufferList(0, 2)
   t.equal(a.buffers.length, 0)
 
-  let b = AudioBufferList(10, 2)
+  let b = new AudioBufferList(10, 2)
   let c = b.slice(0,0)
   t.equal(c.length, 0)
   t.equal(c.buffers.length, 0)
@@ -835,11 +830,11 @@ t('zero buffers', function (t) {
 })
 
 t('update number of channels', function (t) {
-  let a = AudioBufferList(3, 3)
+  let a = new AudioBufferList(3, 3)
 
   t.equal(a.numberOfChannels, 3)
 
-  let b = AudioBufferList(0, 2)
+  let b = new AudioBufferList(0, 2)
 
   t.equal(b.numberOfChannels, 2)
   t.equal(b.length, 0)
@@ -854,7 +849,7 @@ t('update number of channels', function (t) {
 })
 
 t('remove 0-len should return null', function (t) {
-  let a = AudioBufferList(10)
+  let a = new AudioBufferList(10)
   t.ok(a.remove(10))
   t.notOk(a.remove(10))
   t.end()

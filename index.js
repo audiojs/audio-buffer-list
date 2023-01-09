@@ -1,35 +1,24 @@
 /**
  * AudioBufferList class
- *
- * @module audio-buffer/buffer
- *
  */
-'use strict'
 
-var isAudioBuffer = require('is-audio-buffer')
-var util = require('audio-buffer-utils')
-var extend = require('object-assign')
-var nidx = require('negative-index')
-var isPlainObj = require('is-plain-obj')
-var AudioBuffer = require('audio-buffer')
+import util from 'audio-buffer-utils'
+import AudioBuffer from 'audio-buffer'
 
-module.exports = AudioBufferList
-
+export default AudioBufferList
 
 // @constructor
 function AudioBufferList(arg, options) {
+  if (arg?.constructor === Object && !options) options = arg, arg = null
+
   if (!(this instanceof AudioBufferList)) return new AudioBufferList(arg, options)
 
-  if (isPlainObj(arg)) {
-    options = arg
-    arg = null
-  }
   if (typeof options === 'number') {
     options = {channels: options}
   }
   if (options && options.channels != null) options.numberOfChannels = options.channels
 
-  extend(this, options)
+  Object.assign(this, options)
 
   this.buffers = []
   this.length = 0
@@ -105,17 +94,30 @@ AudioBufferList.prototype.copyToChannel = function (source, channel, from) {
 }
 
 
-//patch BufferList methods
+// append buffer to list
 AudioBufferList.prototype.append = function (buf) {
+  if (!buf) return this
+
   //FIXME: we may want to do resampling/channel mapping here or something
   var i = 0
+
+  const appendBuffer = (buf) => {
+    //update channels count
+    this.numberOfChannels = !this.buffers.length ? buf.numberOfChannels : Math.max(this.numberOfChannels, buf.numberOfChannels)
+    this.duration += buf.duration
+    if (!this.sampleRate) this.sampleRate = buf.sampleRate
+
+    //push buffer
+    this.buffers.push(buf)
+    this.length += buf.length
+  }
 
   // unwrap argument into individual BufferLists
   if (buf instanceof AudioBufferList) {
     this.append(buf.buffers)
   }
-  else if (isAudioBuffer(buf) && buf.length) {
-    this._appendBuffer(buf)
+  else if (buf.numberOfChannels && buf.length) {
+    appendBuffer(buf)
   }
   else if (Array.isArray(buf) && typeof buf[0] !== 'number') {
     for (var l = buf.length; i < l; i++) {
@@ -125,36 +127,14 @@ AudioBufferList.prototype.append = function (buf) {
   //create AudioBuffer from (possibly num) arg
   else if (buf) {
     buf = util.create(buf, this.numberOfChannels, this.sampleRate)
-    this._appendBuffer(buf)
+    appendBuffer(buf)
   }
 
   return this
 }
 
-AudioBufferList.prototype._appendBuffer = function (buf) {
-  if (!buf) return this
-
-  //update channels count
-  if (!this.buffers.length) {
-    this.numberOfChannels = buf.numberOfChannels
-  }
-  else {
-    this.numberOfChannels = Math.max(this.numberOfChannels, buf.numberOfChannels)
-  }
-  this.duration += buf.duration
-
-  //init sampleRate
-  if (!this.sampleRate) this.sampleRate = buf.sampleRate
-
-  //push buffer
-  this.buffers.push(buf)
-  this.length += buf.length
-
-  return this
-}
-
-
-AudioBufferList.prototype.offset = function _offset (offset) {
+// get offset from ...
+AudioBufferList.prototype.offset = function (offset) {
   var tot = 0, i = 0, _t
   if (offset === 0) return [ 0, 0 ]
   for (; i < this.buffers.length; i++) {
@@ -181,14 +161,10 @@ AudioBufferList.prototype.copy = function copy (dst, dstStart, srcStart, srcEnd)
     dstStart = 0
   }
 
-  if (typeof srcStart != 'number' || srcStart < 0)
-    srcStart = 0
-  if (typeof srcEnd != 'number' || srcEnd > this.length)
-    srcEnd = this.length
-  if (srcStart >= this.length)
-    return dst || new AudioBuffer(null, {length: 0})
-  if (srcEnd <= 0)
-    return dst || new AudioBuffer(null, {length: 0})
+  if (typeof srcStart != 'number' || srcStart < 0) srcStart = 0
+  if (typeof srcEnd != 'number' || srcEnd > this.length) srcEnd = this.length
+  if (srcStart >= this.length) return dst || new AudioBuffer(null, {length: 0})
+  if (srcEnd <= 0) return dst || new AudioBuffer(null, {length: 0})
 
   var copy   = !!dst
     , off    = this.offset(srcStart)
@@ -380,9 +356,6 @@ AudioBufferList.prototype.remove = function (offset, count) {
 
 //return new list via applying fn to each buffer from the indicated range
 AudioBufferList.prototype.map = function map (fn, from, to) {
-  let options = arguments[arguments.length - 1]
-  if (!isPlainObj(options)) options = {reversed: false}
-
   if (typeof from != 'number') from = 0
   if (typeof to != 'number') to = this.length
   from = nidx(from, this.length)
@@ -393,33 +366,50 @@ AudioBufferList.prototype.map = function map (fn, from, to) {
   let fromOffset = this.offset(from)
   let toOffset = this.offset(to)
 
-  if (options.reversed) {
-    let offset = to - toOffset[1]
-    for (let i = toOffset[0], l = fromOffset[0]; i >= l; i--) {
-      let buf = this.buffers[i]
-      let res = fn.call(this, buf, i, offset, this.buffers, this)
-      if (res === false) break
-      if (res !== undefined) this.buffers[i] = res
-      offset -= buf.length
-    }
+  if (toOffset[1]) {
+    toOffset[0] += 1
+    toOffset[1] = 0
   }
-  else {
-    if (toOffset[1]) {
-      toOffset[0] += 1
-      toOffset[1] = 0
+  let offset = from - fromOffset[1]
+  for (let i = fromOffset[0], l = toOffset[0]; i < l; i++) {
+    let buf = this.buffers[i]
+    let res = fn.call(this, buf, i, offset, this.buffers, this)
+    if (res === false) break
+    if (res !== undefined) {
+      this.buffers[i] = res
     }
-    let offset = from - fromOffset[1]
-    for (let i = fromOffset[0], l = toOffset[0]; i < l; i++) {
-      let buf = this.buffers[i]
-      let res = fn.call(this, buf, i, offset, this.buffers, this)
-      if (res === false) break
-      if (res !== undefined) {
-        this.buffers[i] = res
-      }
-      offset += buf.length
-    }
+    offset += buf.length
   }
 
+  this.normalize();
+
+  return this
+}
+
+// runs map from tail
+AudioBufferList.prototype.reverseMap = function (fn, from, to) {
+  if (typeof from != 'number') from = 0
+  if (typeof to != 'number') to = this.length
+  from = nidx(from, this.length)
+  to = nidx(to, this.length)
+
+  this.split(from, to)
+
+  let fromOffset = this.offset(from)
+  let toOffset = this.offset(to)
+
+  let offset = to - toOffset[1]
+  for (let i = toOffset[0], l = fromOffset[0]; i >= l; i--) {
+    let buf = this.buffers[i]
+    let res = fn.call(this, buf, i, offset, this.buffers, this)
+    if (res === false) break
+    if (res !== undefined) this.buffers[i] = res
+    offset -= buf.length
+  }
+}
+
+// remove empty buffers, normalize number of channels, length, duration
+AudioBufferList.prototype.normalize = function () {
   this.buffers = this.buffers.filter(buf => {
     return buf ? !!buf.length : false
   })
@@ -432,7 +422,6 @@ AudioBufferList.prototype.map = function map (fn, from, to) {
   this.length = l
   this.duration = this.length / this.sampleRate
 
-  return this
 }
 
 
@@ -485,4 +474,12 @@ AudioBufferList.prototype.join = function join (from, to) {
   this.buffers.splice.apply(this.buffers, [fromOffset[0], toOffset[0] - fromOffset[0] + (toOffset[1] ? 1 : 0)].concat(buf))
 
   return buf
+}
+
+// negative-index package (no need to store as dep)
+function nidx (idx, length) {
+	return idx == null ? 0 :
+		idx < 0 ? Math.max(idx + length, 0) :
+		idx > 0 ? Math.min(length, idx) :
+		Object.is(idx, -0) ? length : 0
 }
