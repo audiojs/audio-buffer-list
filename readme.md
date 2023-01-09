@@ -9,15 +9,18 @@ Handy and performant to deal with (possibly long) sequence of audio buffers − 
 
 ```js
 import AudioBufferList from 'audio-buffer-list'
-import AudioBuffer from 'audio-buffer'
-import util from 'audio-buffer-utils'
 
-let abl = new AudioBufferList(util.create([0, .1, .2, .3]), util.create(100))
+let abl = new AudioBufferList([
+  new AudioBuffer({length: 4, sampleRate: 44100 }),
+  new AudioBuffer({length: 100, sampleRate: 44100 })
+])
 
-abl.append(util.create(100))
+abl.append(
+  new AudioBuffer({length: 100})
+)
 
 abl.length // 204
-abl.slice() // <AudioBuffer 0, .1, .2, .3, 0...>
+abl.slice() // <AudioBuffer 0, ...>
 ```
 
 ## API
@@ -135,7 +138,5 @@ Clean up list.
 
 ## See also
 
-* [audio](https://github.com/audiojs/audio) — high-level class for audio manipulations.
-* [audio-buffer](https://github.com/audiojs/audio-buffer) — audio buffer class for nodejs and browser.
 * [audio-buffer-utils](https://github.com/audio-buffer-utils) — toolset for audio buffers.
 * [buffer-list](https://npmjs.org/package/bl) — canonical BufferList implementation.
