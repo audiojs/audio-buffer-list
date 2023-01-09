@@ -25,24 +25,6 @@ abl.slice() // <AudioBuffer 0, ...>
 
 ## API
 
-### Table of Content
-
-* [new AudioBufferList(src?, opts?)](#new-audiobufferlistsource-options)
-* [list.append(buf)](#listappendbuffer)
-* [list.insert(idx?, buf)](#listinsertoffset0-buffer)
-* [list.remove(idx?, len)](#listremoveoffset0-count)
-* [list.slice(from?, to?)](#listslicestart0-end-0)
-* [list.map(val|fn, from?, to?)](#listmapbuffer-index-offset--bufferbool-from0-to-0)
-* [list.copy(dst?, from?, to?)](#listcopydest-start0-end-0)
-* [list.copyFromChannel(dst, ch, from?, to?)](#listcopyfromchannelarr-channel-startinchannel0)
-* [list.copyToChannel(src, ch, from?)](#listcopytochannelarr-channel-startinchannel0)
-* [list.split(a, b, c, ...)](#listsplita-b-c-)
-* [list.join(from?, to?)](#listjoinstart0-end-0)
-* [list.offset(idx)](#listoffsetsample)
-* [list.destroy()](#listdestroy)
-
-<!-- * [list.repeat(times)](#listrepeatcount) -->
-
 ### `new AudioBufferList(source, options?)`
 
 Creates new audio buffer list instance, `new` is not strictly required.
